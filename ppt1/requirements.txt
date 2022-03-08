@@ -1,0 +1,17 @@
+1. Introduction
+	- On atari 2600 + A consice history of consoles is the 70s and 80s
+	- On emulators
+
+2. Why we chose this project
+
+3. Literature
+	- vids
+	- websites
+	- books
+
+4. Objective/Extent
+	Fully complaint emulator capable of running a game written for the
+	original system.
+
+5. SW
+	compilers, debuggers, etc.

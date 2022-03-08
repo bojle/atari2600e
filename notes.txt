@@ -1,0 +1,16 @@
+# Design
+
+"User interface" will be minimal. The graphics library will be used
+only to run the game. The use of graphics library will be minimal. All
+"interactions" will be at the command line.
+
+# Building in phases
+
+Phase 1: Core.
+Phase 2: Minimal GUI.
+Phase 3: Less minimal GUI.
+
+# Bias towards "User Friendly" programs.
+
+Teachers love "User Friendly" programs, acheiving this will be
+difficult. Phases 1 and 2 do not concern User friendliness, phase 3 does.
