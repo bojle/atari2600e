@@ -1,1 +1,4 @@
 1. Atari 2600 Specification Sheet <https://problemkaputt.de/2k6specs.htm>
+2. Stella User Manual <https://stella-emu.github.io/docs/index.html>
+3. Atari 2600 Hardware <https://en.wikipedia.org/wiki/Atari_2600_hardware>
+

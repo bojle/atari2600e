@@ -14,3 +14,8 @@ Phase 3: Less minimal GUI.
 
 Teachers love "User Friendly" programs, acheiving this will be
 difficult. Phases 1 and 2 do not concern User friendliness, phase 3 does.
+
+# Games
+
+1. Space Invaders
+2. Pacman

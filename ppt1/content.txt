@@ -1,0 +1,62 @@
+1. INTRODUCTION
+~~~~~~~~~~~~~~~
+
+Atari is (or was) a pioneer in video-game consoles and home computers.
+The products of which laid the foundations to the video-game industry
+that we see today. One of these products, released in 1977 was the atari
+2600. This was one of the first systems to implement microprocessor based consoles 
+with swappable-ROMS.
+
+Wikipedia says, "an emulator is hardware or software that enables one computer
+system (called the host) to behave like another computer system (called the
+guest)." This succintly captures the spirit of an emulator. 
+
+In our case, we are building a software emulator of a harware console.
+
+THE ATARI 2600 SYSTEM
+~~~~~~~~~~~~~~~~~~~~~
+
+[a26 refers to atari 2600]
+
+* a26 uses a MOS 6507 CPU (a dumbed down version of the infamous 6502).
+* RAM: 128 bytes.
+* ROM: Cartride based.
+and other peripherals.
+* Color pallette: 128-color. 
+
+2. WHY WE CHOSE TO WRITE AN EMULATOR
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Curiosity and desire to understand computers at a deeper level. An 
+emulator is at the goldilock's zone of computer programs. Lower than this and
+we are dealing with hardwares; any higher and the program becomes an
+"application," an abstraction.
+
+WHY THE a26
+~~~~~~~~~~~~
+
+Simplicity and Primacy. The a26 pioneered many techniques in its years. It was
+the first to do [TODO: insert many things]. Its demise today has added a
+mystical element of the system. Although we were born 30 years too late to 
+experience it first-hand, it does not fail to evoke the feelings of nostalgia.
+
+[TODO: More points?]
+
+3. LITERATURE
+~~~~~~~~~~~~~~~
+
+- references.txt
+
+4. Objective/Extent
+~~~~~~~~~~~~~~~~~~~
+
+Getting as close as possible to a Fully complaint emulator capable of 
+running a game written for the original system.
+
+5. SW
+	compilers: gcc, clang, msvc
+	debuggers: gdb,
+	emulators: stella
+	build: make, cmake?
+	libraries: SDL, libc, ...
+	tests: nky (nky stands for no knowledge yet)
