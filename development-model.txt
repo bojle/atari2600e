@@ -1,0 +1,4 @@
+[This file will be updated, more phases will be added as new info comes in]
+
+Phase 1: EMUCORE
+Phase n: GUI
