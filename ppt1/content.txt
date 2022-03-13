@@ -45,7 +45,12 @@ experience it first-hand, it does not fail to evoke the feelings of nostalgia.
 3. LITERATURE
 ~~~~~~~~~~~~~~~
 
-- references.txt
+1. Atari 2600 Specification Sheet - Nocash <https://problemkaputt.de/2k6specs.htm>
+2. 6502 Assembly Language Programming - Christopher Lampton 
+3. Atari 2600 Programming Guide - Steve Wright <https://ia600501.us.archive.org/14/items/StellaProgrammersGuide/2600_guide.pdf>
+4. Making Games for Atari 2600 - Steven Hugg
+5. Atari Age <https://atariage.com/>
+
 
 4. Objective/Extent
 ~~~~~~~~~~~~~~~~~~~
@@ -53,10 +58,18 @@ experience it first-hand, it does not fail to evoke the feelings of nostalgia.
 Getting as close as possible to a Fully complaint emulator capable of 
 running a game written for the original system.
 
-5. SW
+5. Block diagram
+
+The three most crucial parts of the a26 are:
+- TIA custom chip
+- RIOT 6532 chip
+- CPU 6507 
+
+6. SW
 	compilers: gcc, clang, msvc
 	debuggers: gdb,
 	emulators: stella
 	build: make, cmake?
 	libraries: SDL, libc, ...
 	tests: nky (nky stands for no knowledge yet)
+
