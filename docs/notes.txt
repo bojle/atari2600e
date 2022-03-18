@@ -1,0 +1,62 @@
+# Design
+
+"User interface" will be minimal. The graphics library will be used
+only to run the game. The use of graphics library will be minimal. All
+"interactions" will be at the command line.
+
+# Building in phases
+
+Phase 1: Core.
+Phase 2: Minimal GUI.
+Phase 3: Less minimal GUI.
+
+# Bias towards "User Friendly" programs.
+
+Teachers love "User Friendly" programs, acheiving this will be
+difficult. Phases 1 and 2 do not concern User friendliness, phase 3 does.
+
+# Games
+
+1. Space Invaders
+2. Pacman
+
+# Architecture
+
+a26 -> 6507 cpu (6502)
+
+Architecture of 6502 
+
+6 registers: A, SR, X, Y, SP, PC
+
+First five hold 8 bits. PC holds 16 bits
+A - 
+
+Instructions:
+
+Transfers: TAX, TXA, TXY, TYX, TSX, TXS
+Loads: LDA $add, LDX, LDY
+Stores: STX, ^
+Arithmetic: ADC $add, ADC #$ad (# before a hex num means immediate number), SBC,
+INC, INX, INY, DEC, DEX, DEY, 
+Logical: AND (change selected bits to 0s), ORA (change selected bits to 1s), EOR
+(Inverter: any bit eor'ed with 1 will be inverted; eor'ed with 0 remains
+unchanged), ASL, LSR, ROL, ROR
+Compares: CMP, CPX, CPY
+Jumps: JMP, JSR, RTS
+
+Stack address: $0100 to $01ff, SP length = 8bits
+
+# design
+
+Imperative (Procedural)
+
+Procedure/functions should always return something
+- void functions should return an error value.
+- non-void functions should have some other mechanism to indicate errors.
+
+This leads to exceptions and logging.
+- Segfaults are bad, return values should be checked obsessively but not
+  redundantly. 
+- Logging will prove useful when debugging.
+
+Check errors always but log only when in debug mode

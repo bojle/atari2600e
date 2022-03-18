@@ -1,0 +1,1 @@
+/usr/bin/cc -rdynamic CMakeFiles/a.dir/main.c.o -o a  libadd.a -lSDL2 

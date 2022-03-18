@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.2)
+project(atari)
+add_library(add add.c)
+add_executable(a main.c)
+target_link_libraries(a add)
+target_link_libraries(a SDL2)

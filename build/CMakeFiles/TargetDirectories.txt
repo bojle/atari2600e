@@ -1,0 +1,4 @@
+/home/metal/dev/atari2600e/build/CMakeFiles/add.dir
+/home/metal/dev/atari2600e/build/CMakeFiles/a.dir
+/home/metal/dev/atari2600e/build/CMakeFiles/edit_cache.dir
+/home/metal/dev/atari2600e/build/CMakeFiles/rebuild_cache.dir
