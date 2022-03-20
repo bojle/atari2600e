@@ -1,2 +1,5 @@
 *.pdf
 src/Makefile
+*.o
+*.bin
+a
