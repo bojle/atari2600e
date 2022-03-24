@@ -60,3 +60,20 @@ This leads to exceptions and logging.
 - Logging will prove useful when debugging.
 
 Check errors always but log only when in debug mode
+
+On writing 6502 emulators (blargg)
+http://slack.net/~ant/nes-emu/6502.html
+
+NTSC COLOR Values:
+https://web.archive.org/web/20210106180744/https://www.randomterrain.com/atari-2600-memories-tia-color-charts.html
+
+Machine language for beginners:
+https://www.atariarchives.org/mlb/
+
+# EMULATION
+
+Registers
+CPU
+RAM
+ROM
+TIA

@@ -117,17 +117,56 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named add
+# Target rules for targets named mspace
 
 # Build rule for target.
-add: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 add
-.PHONY : add
+mspace: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mspace
+.PHONY : mspace
 
 # fast build rule for target.
-add/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/add.dir/build.make CMakeFiles/add.dir/build
-.PHONY : add/fast
+mspace/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mspace.dir/build.make CMakeFiles/mspace.dir/build
+.PHONY : mspace/fast
+
+#=============================================================================
+# Target rules for targets named main
+
+# Build rule for target.
+main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 main
+.PHONY : main
+
+# fast build rule for target.
+main/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
+.PHONY : main/fast
+
+#=============================================================================
+# Target rules for targets named except
+
+# Build rule for target.
+except: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 except
+.PHONY : except
+
+# fast build rule for target.
+except/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/except.dir/build.make CMakeFiles/except.dir/build
+.PHONY : except/fast
+
+#=============================================================================
+# Target rules for targets named log
+
+# Build rule for target.
+log: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 log
+.PHONY : log
+
+# fast build rule for target.
+log/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/log.dir/build.make CMakeFiles/log.dir/build
+.PHONY : log/fast
 
 #=============================================================================
 # Target rules for targets named a
@@ -142,35 +181,66 @@ a/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/build
 .PHONY : a/fast
 
-add.o: add.c.o
-.PHONY : add.o
+except.o: except.c.o
+.PHONY : except.o
 
 # target to build an object file
-add.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/add.dir/build.make CMakeFiles/add.dir/add.c.o
-.PHONY : add.c.o
+except.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/except.dir/build.make CMakeFiles/except.dir/except.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/except.c.o
+.PHONY : except.c.o
 
-add.i: add.c.i
-.PHONY : add.i
+except.i: except.c.i
+.PHONY : except.i
 
 # target to preprocess a source file
-add.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/add.dir/build.make CMakeFiles/add.dir/add.c.i
-.PHONY : add.c.i
+except.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/except.dir/build.make CMakeFiles/except.dir/except.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/except.c.i
+.PHONY : except.c.i
 
-add.s: add.c.s
-.PHONY : add.s
+except.s: except.c.s
+.PHONY : except.s
 
 # target to generate assembly for a file
-add.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/add.dir/build.make CMakeFiles/add.dir/add.c.s
-.PHONY : add.c.s
+except.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/except.dir/build.make CMakeFiles/except.dir/except.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/except.c.s
+.PHONY : except.c.s
+
+log.o: log.c.o
+.PHONY : log.o
+
+# target to build an object file
+log.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/log.dir/build.make CMakeFiles/log.dir/log.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/log.c.o
+.PHONY : log.c.o
+
+log.i: log.c.i
+.PHONY : log.i
+
+# target to preprocess a source file
+log.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/log.dir/build.make CMakeFiles/log.dir/log.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/log.c.i
+.PHONY : log.c.i
+
+log.s: log.c.s
+.PHONY : log.s
+
+# target to generate assembly for a file
+log.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/log.dir/build.make CMakeFiles/log.dir/log.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/log.c.s
+.PHONY : log.c.s
 
 main.o: main.c.o
 .PHONY : main.o
 
 # target to build an object file
 main.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/main.c.o
 .PHONY : main.c.o
 
@@ -179,6 +249,7 @@ main.i: main.c.i
 
 # target to preprocess a source file
 main.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/main.c.i
 .PHONY : main.c.i
 
@@ -187,8 +258,36 @@ main.s: main.c.s
 
 # target to generate assembly for a file
 main.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/main.c.s
 .PHONY : main.c.s
+
+mspace.o: mspace.c.o
+.PHONY : mspace.o
+
+# target to build an object file
+mspace.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mspace.dir/build.make CMakeFiles/mspace.dir/mspace.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/mspace.c.o
+.PHONY : mspace.c.o
+
+mspace.i: mspace.c.i
+.PHONY : mspace.i
+
+# target to preprocess a source file
+mspace.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mspace.dir/build.make CMakeFiles/mspace.dir/mspace.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/mspace.c.i
+.PHONY : mspace.c.i
+
+mspace.s: mspace.c.s
+.PHONY : mspace.s
+
+# target to generate assembly for a file
+mspace.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mspace.dir/build.make CMakeFiles/mspace.dir/mspace.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/mspace.c.s
+.PHONY : mspace.c.s
 
 # Help Target
 help:
@@ -199,13 +298,22 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... a"
-	@echo "... add"
-	@echo "... add.o"
-	@echo "... add.i"
-	@echo "... add.s"
+	@echo "... except"
+	@echo "... log"
+	@echo "... main"
+	@echo "... mspace"
+	@echo "... except.o"
+	@echo "... except.i"
+	@echo "... except.s"
+	@echo "... log.o"
+	@echo "... log.i"
+	@echo "... log.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... mspace.o"
+	@echo "... mspace.i"
+	@echo "... mspace.s"
 .PHONY : help
 
 

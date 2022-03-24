@@ -14,9 +14,9 @@ ClearMem
 	sta 0,X
 	dex
 	bne ClearMem
-	lda #$00
+	lda #$66
 	sta COLUBK
-	lda #33
+	lda #$d0
 	sta COLUP0
 MainLoop
 	lda  #2

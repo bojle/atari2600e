@@ -63,7 +63,10 @@ CMAKE_BINARY_DIR = /home/metal/dev/atari2600e/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/add.dir/all
+all: CMakeFiles/mspace.dir/all
+all: CMakeFiles/main.dir/all
+all: CMakeFiles/except.dir/all
+all: CMakeFiles/log.dir/all
 all: CMakeFiles/a.dir/all
 .PHONY : all
 
@@ -72,49 +75,132 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/add.dir/clean
+clean: CMakeFiles/mspace.dir/clean
+clean: CMakeFiles/main.dir/clean
+clean: CMakeFiles/except.dir/clean
+clean: CMakeFiles/log.dir/clean
 clean: CMakeFiles/a.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/add.dir
+# Target rules for target CMakeFiles/mspace.dir
 
 # All Build rule for target.
-CMakeFiles/add.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/add.dir/build.make CMakeFiles/add.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/add.dir/build.make CMakeFiles/add.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/metal/dev/atari2600e/build/CMakeFiles --progress-num=3,4 "Built target add"
-.PHONY : CMakeFiles/add.dir/all
+CMakeFiles/mspace.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mspace.dir/build.make CMakeFiles/mspace.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mspace.dir/build.make CMakeFiles/mspace.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/metal/dev/atari2600e/build/CMakeFiles --progress-num=12,13 "Built target mspace"
+.PHONY : CMakeFiles/mspace.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/add.dir/rule: cmake_check_build_system
+CMakeFiles/mspace.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/add.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/mspace.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 0
-.PHONY : CMakeFiles/add.dir/rule
+.PHONY : CMakeFiles/mspace.dir/rule
 
 # Convenience name for target.
-add: CMakeFiles/add.dir/rule
-.PHONY : add
+mspace: CMakeFiles/mspace.dir/rule
+.PHONY : mspace
 
 # clean rule for target.
-CMakeFiles/add.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/add.dir/build.make CMakeFiles/add.dir/clean
-.PHONY : CMakeFiles/add.dir/clean
+CMakeFiles/mspace.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mspace.dir/build.make CMakeFiles/mspace.dir/clean
+.PHONY : CMakeFiles/mspace.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/main.dir
+
+# All Build rule for target.
+CMakeFiles/main.dir/all: CMakeFiles/mspace.dir/all
+CMakeFiles/main.dir/all: CMakeFiles/except.dir/all
+CMakeFiles/main.dir/all: CMakeFiles/log.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/metal/dev/atari2600e/build/CMakeFiles --progress-num=10,11 "Built target main"
+.PHONY : CMakeFiles/main.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/main.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 8
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/main.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 0
+.PHONY : CMakeFiles/main.dir/rule
+
+# Convenience name for target.
+main: CMakeFiles/main.dir/rule
+.PHONY : main
+
+# clean rule for target.
+CMakeFiles/main.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/clean
+.PHONY : CMakeFiles/main.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/except.dir
+
+# All Build rule for target.
+CMakeFiles/except.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/except.dir/build.make CMakeFiles/except.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/except.dir/build.make CMakeFiles/except.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/metal/dev/atari2600e/build/CMakeFiles --progress-num=6,7 "Built target except"
+.PHONY : CMakeFiles/except.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/except.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/except.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 0
+.PHONY : CMakeFiles/except.dir/rule
+
+# Convenience name for target.
+except: CMakeFiles/except.dir/rule
+.PHONY : except
+
+# clean rule for target.
+CMakeFiles/except.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/except.dir/build.make CMakeFiles/except.dir/clean
+.PHONY : CMakeFiles/except.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/log.dir
+
+# All Build rule for target.
+CMakeFiles/log.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/log.dir/build.make CMakeFiles/log.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/log.dir/build.make CMakeFiles/log.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/metal/dev/atari2600e/build/CMakeFiles --progress-num=8,9 "Built target log"
+.PHONY : CMakeFiles/log.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/log.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/log.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 0
+.PHONY : CMakeFiles/log.dir/rule
+
+# Convenience name for target.
+log: CMakeFiles/log.dir/rule
+.PHONY : log
+
+# clean rule for target.
+CMakeFiles/log.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/log.dir/build.make CMakeFiles/log.dir/clean
+.PHONY : CMakeFiles/log.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/a.dir
 
 # All Build rule for target.
-CMakeFiles/a.dir/all: CMakeFiles/add.dir/all
+CMakeFiles/a.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/a.dir/build.make CMakeFiles/a.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/metal/dev/atari2600e/build/CMakeFiles --progress-num=1,2 "Built target a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/metal/dev/atari2600e/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target a"
 .PHONY : CMakeFiles/a.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/a.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/a.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/metal/dev/atari2600e/build/CMakeFiles 0
 .PHONY : CMakeFiles/a.dir/rule

@@ -218,14 +218,8 @@ atari_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 atari_SOURCE_DIR:STATIC=/home/metal/dev/atari2600e/src
 
-//Value Computed by CMake
-this_p_BINARY_DIR:STATIC=/home/metal/dev/atari2600e/build
-
-//Value Computed by CMake
-this_p_IS_TOP_LEVEL:STATIC=ON
-
-//Value Computed by CMake
-this_p_SOURCE_DIR:STATIC=/home/metal/dev/atari2600e/src
+//Dependencies for the target
+main_LIB_DEPENDS:STATIC=general;except;general;mspace;general;log;
 
 
 ########################

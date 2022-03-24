@@ -3,3 +3,6 @@ src/Makefile
 *.o
 *.bin
 a
+build/
+./src/bfr_dawn/
+*.log

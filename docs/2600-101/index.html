@@ -1,0 +1,120 @@
+
+<body bgcolor="white">
+<b><font face="arial" size=7>2600 101</font></b><br>
+<b><font face="arial" size=5>A tutorial by Kirk Israel</font></b><br>
+<b><font face="arial" size=4>Version 1.1 <i>-- Last Updated April 2004</font></i></b>
+
+<br><br>
+
+
+<b><font face="arial" size=5>Introduction</font></b><br>
+
+So you want to be an Atari Programmer, make that 2600 sing, dance, do tricks for you?
+What are you, some kind of masochist?
+<br><br>
+In case you haven't heard, programming a VCS is not easy.  It's a very quirky beast,
+it has very little memory or other resources to work with, and your program has to
+hold the hand of the TIA television interface chip for (almost) <i>every damn scanline</i>...
+demanding a fairly detailed knowledge of what the TV's electron beam is doing as it
+draws the screen...and what it's doing (or at least for how long) when it's <i>not</i>
+drawing the screen.  Not afraid?  "You will be...you will be."
+
+<br><br>
+So why do it? There are a number of reasons:
+<ul>
+<li>To connect in a fundamental way with the grandmaster of our misspent childhoods.
+<li>The challenge of it all. Like writing haiku while drunk and on the back of a
+charging rhino.
+<li>Actually, I hate challenges, but there's something cool about making a game out of such simple
+little pieces, kind of like Legos when they were all square, with maybe a few wheel pieces
+thrown in.
+<li>To interact with something you made on a real live TV.
+<li>The groupies.
+<li>Ok, I'm kidding about the groupies.
+<li>Why not program for other, more modern consoles?
+   Despite (or because of) the difficulty of the 2600, there is a community and set of resources
+	for it that I haven't seen for other systems you could potentially homebrew for. (YMMV)
+<li>Why not just make games for Windows, in VB? Or a more powerful language?
+Or online, in Shockwave or Flash or Java?  Yeah,
+   go on, cry to mama you little wuss!  But seriously:
+most successful modern games are big budget productions done by teams of people.
+Your program is likely to languish in shareware/freeware hell, ignored by millions, and competing
+for attention with thousands and thousands of other little games. Make a decent classic game,
+and you will get a lot of attention from the classic game collectors and their friends. You can
+even sell copies at shows like CVGE and PhillyClassic, and be duly admired
+in cash form. (If you work out the hourly
+rate for your programming efforts, you'd probably be better off flipping burgers, but that's not the point.)
+</ul>
+
+
+
+But, "I am but a learner" myself right now. I'm writing this tutorial as I go
+along, with huge amounts of help from the fine friendly folk on
+<a href="http://www.biglist.com/lists/stella/">the Stella mailing list</a>-
+more on them later. I'll try not to make too many assumptions about
+what you know, but I'll probably be assuming a certain level of programming
+knowledge in my audience...if you've never written a single program in
+any computer language ever, the Atari probably isn't the best place to start.
+<br><br>
+
+<i>UPDATE: I made this tutorial in Autumn 2002.  I'm updating in the
+Spring of 2004, having a 2600 homebrew under my
+belt: JoustPong!
+I kept a <a href="http://alienbill.com/joustpong/">development journal</a>
+that you might wish to skim through if you want to know the trials,
+tribulation, and triumph of making a real 2600 game.  </i>
+<br><br>
+
+
+<a name="infores"><b><font face="arial" size=5>Information Resources</font></b></a><br>
+These resources are your friends. Theoretically, if you went through all of the following, you might not
+need this tutorial! (I hope to make it worth your while anyway.)
+<ul>
+<li><a href="http://www.biglist.com/lists/stella/">The Stella mailing list</a>. If you're serious
+about Atari programming, you should join this.  This site has an archive going all the way
+back to October of 1996. More to the point, the people on the list seem pretty friendly
+to well meaning newbies. (Me being the case in point.) Check out
+<a href="http://www.biglist.com/lists/stella/intro.shtml">the group's introduction</a> for more details.
+You might want to consider checking out the new edition of
+<a href="http://www.homebrewgames.net/thedig/">The Dig</a>, a high powered search engine
+of the site's archives.  (A guy named Garon Grainger ran the
+<a href="http://www.neonghost.com/the-dig/index.html">Original Dig</a>, which was
+quite an inspiration for me in the early days--now however it is sadly gone missing.)
+
+<li>If you're not familiar with 6502 Assembly Language (though it seems that many people who
+get into this hobby are, I'm not one of them) you should check out
+<a href="http://www.geocities.com/oneelkruns/asm1step.html">Assembly In One Step</a>
+<i>(<a href="docs/onestep.html">local mirror</a>)</i>, a one (big) page guide to the
+language.
+
+<li>The infamous <a href="docs/stella.html">Stella Programmer's Guide</a>. This is the closest thing
+we have to a bible.  All about the TIA chip and the special ways to coax her magic from her.
+Here I have a local link to an excellent HTML conversion by B. Watson.
+A little Googling should probably be able to locate it in PDF and other formats.
+
+
+<li>
+
+<a href="http://atariage.com">AtariAge</a> has become a huge supporter
+of homebrew efforts.  From putting up "in development" pages, to running
+message  board forums, to working with authors to get their games into hardware and working on real-live Ataris, to a great storefront,
+the site is a huge resource and I consider it THE online resource for Atari...heck, for almost all of classic gaming.
+
+
+
+</ul>
+
+Next: <a href="01env.html">The Development Environment</a>
+
+
+
+<table border=1><tr><td>
+<a href="index.html">Introduction</a> -
+<a href="01env.html">The Development Environment</a> -
+<a href="02breach.html">Into The Breach</a> -
+<a href="03first.html">My First Program</a> - <br>
+<a href="04clink.html">Kernal Clink</a> -
+<a href="05joy.html">The Joy of Sticks</a> -
+<a href="06happy.html">Happy Face</a> -
+<a href="07buffer.html">PlayerBufferStuffer</a>
+</td><tr></table>
