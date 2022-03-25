@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #include "cpu.h"
 #include "log.h"
+#include "mspace.h"
 
 /* ADDRESSED ARE STORED WITH LOW BYTE FIRST 
  * naming convention
@@ -140,22 +142,14 @@ void inst_tbl_init() {
 
 	/************* B ************/
 	inst_assign(0x90, 2, 2, bcc);
-
 	inst_assign(0xb0, 2, 2, bcs);
-
 	inst_assign(0xf0, 2, 2, beq);
-
 	inst_assign(0x24, 2, 3, bitz);
 	inst_assign(0x2C, 3, 4, bit);
-
 	inst_assign(0x30, 2, 2, bmi);
-
 	inst_assign(0xd0, 2, 2, bne);
-
 	inst_assign(0x10, 2, 2, bpl);
-
 	inst_assign(0x00, 1, 7, brk);
-
 	inst_assign(0x50, 2, 2, bvc);
 	inst_assign(0x00, 1, 7, bvs);
 
@@ -188,7 +182,6 @@ void inst_tbl_init() {
 	inst_assign(0xD6, 2, 6, deczx);
 	inst_assign(0xCE, 3, 6, dec);
 	inst_assign(0xDE, 3, 7, decax);
-
 	inst_assign(0xca, 1, 2, dex);
 	inst_assign(0x88, 1, 2, dey);
 
@@ -205,14 +198,11 @@ void inst_tbl_init() {
 	inst_assign(0xF6, 2, 6, inczx);
 	inst_assign(0xEE, 3, 6, inc);
 	inst_assign(0xFE, 3, 7, incax);
-
 	inst_assign(0xe8, 1, 2, inx);
-
 	inst_assign(0xc8, 1, 2, iny);
 
 	inst_assign(0x4C, 3, 3, jmp);
 	inst_assign(0x6C, 3, 5, jmpin);
-
 	inst_assign(0x20, 3, 6, jsr);
 
 	inst_assign(0xA9, 2, 2, ldai);
@@ -256,7 +246,6 @@ void inst_tbl_init() {
 	inst_assign(0x48, 1, 3, pha);
 	inst_assign(0x08, 1, 3, php);
 	inst_assign(0x68, 1, 4, pla);
-
 	inst_assign(0x28, 1, 4, plp);
 
 	inst_assign(0x2A, 1, 2, rola);
@@ -310,6 +299,112 @@ void inst_tbl_init() {
 	inst_assign(0x8a, 1, 2, txa);
 	inst_assign(0x9a, 1, 2, txs);
 	inst_assign(0x98, 1, 2, tya);
+	/********* Vacant ************/
+	inst_assign(0x02, 0, 0, vac);
+	inst_assign(0x03, 0, 0, vac);
+	inst_assign(0x04, 0, 0, vac);
+	inst_assign(0x07, 0, 0, vac);
+	inst_assign(0x0B, 0, 0, vac);
+	inst_assign(0x0C, 0, 0, vac);
+	inst_assign(0x0F, 0, 0, vac);
+	inst_assign(0x12, 0, 0, vac);
+	inst_assign(0x13, 0, 0, vac);
+	inst_assign(0x14, 0, 0, vac);
+	inst_assign(0x17, 0, 0, vac);
+	inst_assign(0x1A, 0, 0, vac);
+	inst_assign(0x1B, 0, 0, vac);
+	inst_assign(0x1C, 0, 0, vac);
+	inst_assign(0x1F, 0, 0, vac);
+	inst_assign(0x42, 0, 0, vac);
+	inst_assign(0x43, 0, 0, vac);
+	inst_assign(0x44, 0, 0, vac);
+	inst_assign(0x47, 0, 0, vac);
+	inst_assign(0x4B, 0, 0, vac);
+	inst_assign(0x4F, 0, 0, vac);
+	inst_assign(0x52, 0, 0, vac);
+	inst_assign(0x53, 0, 0, vac);
+	inst_assign(0x54, 0, 0, vac);
+	inst_assign(0x57, 0, 0, vac);
+	inst_assign(0x5A, 0, 0, vac);
+	inst_assign(0x5B, 0, 0, vac);
+	inst_assign(0x5C, 0, 0, vac);
+	inst_assign(0x5F, 0, 0, vac);
+	inst_assign(0x80, 0, 0, vac);
+	inst_assign(0x82, 0, 0, vac);
+	inst_assign(0x83, 0, 0, vac);
+	inst_assign(0x87, 0, 0, vac);
+	inst_assign(0x89, 0, 0, vac);
+	inst_assign(0x8B, 0, 0, vac);
+	inst_assign(0x8F, 0, 0, vac);
+	inst_assign(0x92, 0, 0, vac);
+	inst_assign(0x93, 0, 0, vac);
+	inst_assign(0x97, 0, 0, vac);
+	inst_assign(0x9B, 0, 0, vac);
+	inst_assign(0x9C, 0, 0, vac);
+	inst_assign(0x9E, 0, 0, vac);
+	inst_assign(0x9F, 0, 0, vac);
+	inst_assign(0xC2, 0, 0, vac);
+	inst_assign(0xC3, 0, 0, vac);
+	inst_assign(0xC7, 0, 0, vac);
+	inst_assign(0xCB, 0, 0, vac);
+	inst_assign(0xCF, 0, 0, vac);
+	inst_assign(0xD2, 0, 0, vac);
+	inst_assign(0xD3, 0, 0, vac);
+	inst_assign(0xD4, 0, 0, vac);
+	inst_assign(0xD7, 0, 0, vac);
+	inst_assign(0xDA, 0, 0, vac);
+	inst_assign(0xDB, 0, 0, vac);
+	inst_assign(0xDC, 0, 0, vac);
+	inst_assign(0xDF, 0, 0, vac);
+	inst_assign(0x22, 0, 0, vac);
+	inst_assign(0x23, 0, 0, vac);
+	inst_assign(0x27, 0, 0, vac);
+	inst_assign(0x2B, 0, 0, vac);
+	inst_assign(0x2F, 0, 0, vac);
+	inst_assign(0x32, 0, 0, vac);
+	inst_assign(0x33, 0, 0, vac);
+	inst_assign(0x34, 0, 0, vac);
+	inst_assign(0x37, 0, 0, vac);
+	inst_assign(0x3A, 0, 0, vac);
+	inst_assign(0x3B, 0, 0, vac);
+	inst_assign(0x3C, 0, 0, vac);
+	inst_assign(0x3F, 0, 0, vac);
+	inst_assign(0x62, 0, 0, vac);
+	inst_assign(0x63, 0, 0, vac);
+	inst_assign(0x64, 0, 0, vac);
+	inst_assign(0x67, 0, 0, vac);
+	inst_assign(0x6B, 0, 0, vac);
+	inst_assign(0x6F, 0, 0, vac);
+	inst_assign(0x72, 0, 0, vac);
+	inst_assign(0x73, 0, 0, vac);
+	inst_assign(0x74, 0, 0, vac);
+	inst_assign(0x77, 0, 0, vac);
+	inst_assign(0x7A, 0, 0, vac);
+	inst_assign(0x7B, 0, 0, vac);
+	inst_assign(0x7C, 0, 0, vac);
+	inst_assign(0x7F, 0, 0, vac);
+	inst_assign(0xA3, 0, 0, vac);
+	inst_assign(0xA7, 0, 0, vac);
+	inst_assign(0xAB, 0, 0, vac);
+	inst_assign(0xAF, 0, 0, vac);
+	inst_assign(0xB2, 0, 0, vac);
+	inst_assign(0xB3, 0, 0, vac);
+	inst_assign(0xB7, 0, 0, vac);
+	inst_assign(0xBB, 0, 0, vac);
+	inst_assign(0xBF, 0, 0, vac);
+	inst_assign(0xE2, 0, 0, vac);
+	inst_assign(0xE3, 0, 0, vac);
+	inst_assign(0xE7, 0, 0, vac);
+	inst_assign(0xEB, 0, 0, vac);
+	inst_assign(0xEF, 0, 0, vac);
+	inst_assign(0xF2, 0, 0, vac);
+	inst_assign(0xF3, 0, 0, vac);
+	inst_assign(0xF4, 0, 0, vac);
+	inst_assign(0xF7, 0, 0, vac);
+	inst_assign(0xFA, 0, 0, vac);
+	inst_assign(0xFB, 0, 0, vac);
+	inst_assign(0xFC, 0, 0, vac);
+	inst_assign(0xFF, 0, 0, vac);
 	log_trace("inst_tbl_init(): Initialized Instruction Table");
 }
 
@@ -464,3 +559,14 @@ void tsx() {}
 void txa() {}
 void txs() {}
 void tya() {}
+
+void vac() {
+	log_fatal("Invalid/Vacant Instruction; Exiting");
+	exit(EXIT_FAILURE);
+}
+
+void exec(byte_t opcode, byte_t *size, byte_t *cycles) {
+	*size = (inst_tbl[opcode]).bytes;
+	*cycles = (inst_tbl[opcode]).cycles;
+	(inst_tbl[opcode]).exec();
+}

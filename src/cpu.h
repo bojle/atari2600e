@@ -1,8 +1,10 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include "mspace.h"
+
 void inst_tbl_init();
-void exec(int name, int *size, int *cycles);
+void exec(byte_t opcode, byte_t *size, byte_t *cycles);
 
 void adci();
 void adcz();
@@ -155,4 +157,5 @@ void tsx();
 void txa();
 void txs();
 void tya();
+void vac();
 #endif

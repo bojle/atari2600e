@@ -1,5 +1,5 @@
 #!/bin/bash
 
 while read var; do
-	echo 'void ICH();' | sed "s/ICH/$var/g"
+	echo 'inst_assign(0xICH, 0, 0, vac);' | sed "s/ICH/$var/g"
 done
