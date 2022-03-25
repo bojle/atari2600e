@@ -1,1 +1,0 @@
-/usr/bin/cc -rdynamic CMakeFiles/a.dir/main.c.o CMakeFiles/a.dir/except.c.o CMakeFiles/a.dir/mspace.c.o CMakeFiles/a.dir/log.c.o -o a 

@@ -12,7 +12,6 @@ made changes and additions where appropriate.
 the 6510 (the C64 processor).
 
 
-
   THE REGISTERS INSIDE THE 6502 MICROPROCESSOR
 
     Almost all calculations are done in the microprocessor. Registers are
@@ -259,8 +258,7 @@ the 6510 (the C64 processor).
   |     ADC   Add Memory to Accumulator with Carry
   |     AND   "AND" Memory with Accumulator
   |     ASL   Shift Left One Bit (Memory or Accumulator)
-  |
-  |     BCC   Branch on Carry Clear
+  | |     BCC   Branch on Carry Clear
   |     BCS   Branch on Carry Set
   |     BEQ   Branch on Result Zero
   |     BIT   Test Bits in Memory with Accumulator

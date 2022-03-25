@@ -1,3 +1,6 @@
+#ifndef MSPACE_H
+#define MSPACE_H
+
 #include <stdint.h>
 
 /* Width of the data bus */
@@ -94,3 +97,5 @@ void set_P(byte_t b);
 byte_t fetch_P();
 
 void load_cartridge(char *filename);
+
+#endif

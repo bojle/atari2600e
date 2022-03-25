@@ -1,6 +1,10 @@
 #include <errno.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "mspace.h"
+#include "log.h"
+#include "except.h"
 
 
 /* The Address/Memory Space accessible to the CPU */
@@ -82,6 +86,14 @@ byte_t fetch_P() {
 
 void load_cartridge(char *filename) {
 	FILE *fp = fopen(filename, "r");
-	
-
+	if (!fp) {
+		log_fatal("%s: %s\n", filename, strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+	const int cart_size = CARMEM_END - CARMEM_START;
+	byte_t tbuf[cart_size];
+	int read_size = fread(tbuf, sizeof(byte_t), cart_size, fp);
+	memcpy(mspace + CARMEM_START, tbuf, read_size);
+	log_trace("load_cartridge(): Loaded Cartridge Into Memory");
+	fclose(fp);
 }
