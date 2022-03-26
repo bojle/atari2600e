@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 #include "cpu.h"
 #include "log.h"
 #include "mspace.h"
@@ -612,14 +614,6 @@ byte_t inst_exec(byte_t opcode) {
 	return ((inst_tbl[opcode])).exec();
 }
 
-typedef struct state_t {
-	byte_t A;			
-	byte_t X;			
-	byte_t Y;			
-	byte_t S;			
-	byte_t P;			
-	addr_t PC;
-} state_t;
 
 void record_state(state_t *s) {
 	s->A = fetch_A();
@@ -630,7 +624,33 @@ void record_state(state_t *s) {
 	s->PC = fetch_PC();
 }
 
-void disassemble(byte_t opcode, state_t *s) {
+FILE *disas_fp = NULL;
+#define DISAS_FILENAME "dis.asm"
+void disassembler_init() {
+	disas_fp = fopen(DISAS_FILENAME, "w+");
+	if (!disas_fp) {
+		log_fatal("disassembler_init(): %s", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 }
-	
 
+void disassemble(byte_t opcode, state_t *s) {
+	addr_t pc = s->PC;
+	pc++;
+	addr_t operand = 0;
+	byte_t size = inst_bytes(opcode);
+	byte_t byte = 0;
+	for (int i = 0; i < size-1; ++i) {
+		byte = fetch_byte(pc++);
+		operand += (byte << (8 * i));
+	}
+	fprintf(disas_fp, "%s (0x%02x,%d,%d)\t0x%04x\n", inst_name(opcode),
+			opcode, size, inst_cycles(opcode), operand);
+	fprintf(disas_fp, "\tOLD STATE\t\tNEW STATE\n");
+	fprintf(disas_fp, "\tA:\t0x%x,%d\t\t0x%x,%d\n", s->A, s->A, fetch_A(), fetch_A());
+	fprintf(disas_fp, "\tX:\t0x%x,%d\t\t0x%x,%d\n", s->X, s->X, fetch_X(), fetch_X());
+	fprintf(disas_fp, "\tY:\t0x%x,%d\t\t0x%x,%d\n", s->Y, s->Y, fetch_Y(), fetch_Y());
+	fprintf(disas_fp, "\tS:\t0x%x,%d\t\t0x%x,%d\n", s->S, s->S, fetch_S(), fetch_S());
+	fprintf(disas_fp, "\tP:\t0x%x,%d\t\t0x%x,%d\n", s->P, s->P, fetch_P(), fetch_P());
+	fprintf(disas_fp, "\tPC:\t0x%x\t\t0x%x\n", s->PC, fetch_PC());
+}

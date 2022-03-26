@@ -11,21 +11,24 @@ int main(int argc, char *argv[]) {
 	}
 	except_tbl_init();
 	inst_tbl_init();
+	disassembler_init();
 	load_cartridge(argv[1]);
 	set_PC(CARMEM_START);
 	
 	byte_t size = 0;
 	byte_t cycles = 0;
 	char *name;
+	byte_t opcode;
+	state_t state;
 	for (addr_t pc = fetch_PC(); pc < CARMEM_END; ) {
-		printf("A: %d\n", fetch_A());
-		byte_t opcode = fetch_byte(pc);
+		record_state(&state);
+		opcode = fetch_byte(pc);
 		size = inst_bytes(opcode);
 		cycles = inst_cycles(opcode);
 		name = inst_name(opcode);
-		printf("Name: %s\tOpcode: %x\tSize: %d\tCycles: %d\n", name, opcode, size, cycles);
 		inst_exec(opcode);
 		pc += size;
 		set_PC(pc);
+		disassemble(opcode, &state);
 	}
 }
