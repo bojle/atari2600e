@@ -69,6 +69,16 @@ enum {
 	CXCLR  = 0x2C 
 };
 
+enum status_t {
+	STATUS_C = 1,         /* Carry         (0=No Carry, 1=Carry)                      */
+	STATUS_Z = 2,         /* Zero          (0=Nonzero, 1=Zero)                        */
+	STATUS_I = 4,         /* IRQ Disable   (0=IRQ Enable, 1=IRQ Disable)              */
+	STATUS_D = 8,         /* Decimal Mode  (0=Normal, 1=BCD Mode for ADC/SBC opcodes) */
+	STATUS_B = 16,        /* Break Flag    (0=IRQ/NMI, 1=RESET or BRK/PHP opcode)     */
+	STATUS_V = 64,        /* Overflow      (0=No Overflow, 1=Overflow)                */
+	STATUS_N = 128        /* Negative/Sign (0=Positive, 1=Negative)                   */
+};
+
 /******************************************
  * 				Functions                 *
  ******************************************/
@@ -95,6 +105,10 @@ byte_t fetch_S();
 
 void set_P(byte_t b);
 byte_t fetch_P();
+
+void set_STATUS(enum status_t st);
+byte_t fetch_STATUS(enum status_t st);
+
 
 void load_cartridge(char *filename);
 

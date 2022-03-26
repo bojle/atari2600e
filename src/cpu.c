@@ -32,6 +32,7 @@ typedef struct inst_t {
 	char *name;
 } inst_t;
 
+
 static inst_t inst_tbl[INSTN];
 
 #define inst_assign(opcode, nbytes, ncycles, execfn, iname) \
@@ -41,7 +42,18 @@ static inst_t inst_tbl[INSTN];
 int adci() {
 	addr_t pc = fetch_PC();
 	byte_t operand = fetch_byte(pc + 1);
-	byte_t A = fetch_A() + operand;
+	byte_t A = fetch_A();
+	// TODO: Check for Overflow (STATUS_V)
+	if (A + operand > 255) {
+		set_STATUS(STATUS_C);
+	}
+	A += operand;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	set_A(A);
 	return 0;
 }
@@ -123,6 +135,12 @@ int ldai() {
 	addr_t pc = fetch_PC();
 	byte_t operand = fetch_byte(pc + 1);
 	set_A(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	return 0;
 }
 
@@ -131,6 +149,12 @@ int ldaz() {
 	addr_t zaddr = fetch_byte(pc + 1);
 	byte_t operand = fetch_byte(zaddr);
 	set_A(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	return 0;
 }
 int ldazx() {
@@ -139,16 +163,28 @@ int ldazx() {
 	zaddr += fetch_X();
 	byte_t operand = fetch_byte(zaddr);
 	set_A(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	return 0;
 }
 int lda() {
 	addr_t pc = fetch_PC();
 	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
 	addr_t upper = fetch_byte(pc + 2);
-	upper = (upper << 4);
+	upper = (upper << 8);
 	addr_t addr = upper + lower;
 	byte_t operand = fetch_byte(addr);
 	set_A(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	return 0;
 }
 int ldaax() {
@@ -166,6 +202,12 @@ int ldaax() {
 	}
 	byte_t operand = fetch_byte(naddr);
 	set_A(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	return extra_cycles;
 }
 
@@ -177,26 +219,144 @@ int ldaay() {
 	byte_t pg_no = upper;
 	upper = (upper << 8);
 	addr_t addr = upper + lower;
-	addr_t naddr = addr + fetch_X();
+	addr_t naddr = addr + fetch_Y();
 	byte_t npg_no = (naddr >> 8);
 	if (npg_no != pg_no) {
 		extra_cycles++;
 	}
 	byte_t operand = fetch_byte(naddr);
 	set_A(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	return extra_cycles;
 }
 
-int ldainx() {}
-int ldainy() {}
+int ldainx() {
+	addr_t pc = fetch_PC();
+	byte_t operand = fetch_byte(pc + 1);
+	operand += fetch_X();
+	addr_t addr_lower = fetch_byte(operand);
+	addr_t addr_upper = fetch_byte(operand + 1);
+	addr_upper = addr_upper << 8;
+	addr_upper += addr_lower;
+	set_A(fetch_byte(addr_upper));
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+int ldainy() {
+	byte_t extra_cycles = 0;
+	addr_t pc = fetch_PC();
+	byte_t operand = fetch_byte(pc + 1);
+	addr_t addr_lower = fetch_byte(operand);
+	addr_t addr_upper = fetch_byte(operand + 1);
+	byte_t pg_no = addr_upper;
+	addr_upper <<= 8;
+	addr_upper += addr_lower;
+	addr_upper += fetch_Y();
+	byte_t npg_no = (addr_upper >> 8);
+	if (pg_no != npg_no) {
+		extra_cycles++;
+	}
+	set_A(fetch_byte(addr_upper));
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return extra_cycles;
+}
 
 int ldxi() {
-	
+	addr_t pc = fetch_PC();
+	byte_t operand = fetch_byte(pc + 1);
+	set_X(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
 }
-int ldxz() {}
-int ldxzy() {}
-int ldx() {}
-int ldxay() {}
+int ldxz() {
+	addr_t pc = fetch_PC();
+	addr_t zaddr = fetch_byte(pc + 1);
+	byte_t operand = fetch_byte(zaddr);
+	set_X(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+int ldxzy() {
+	addr_t pc = fetch_PC();
+	addr_t zaddr = fetch_byte(pc + 1);
+	zaddr += fetch_Y();
+	byte_t operand = fetch_byte(zaddr);
+	set_X(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+
+int ldx() {
+	addr_t pc = fetch_PC();
+	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
+	addr_t upper = fetch_byte(pc + 2);
+	upper = (upper << 8);
+	addr_t addr = upper + lower;
+	byte_t operand = fetch_byte(addr);
+	set_X(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+
+int ldxay() {
+	byte_t extra_cycles = 0;
+	addr_t pc = fetch_PC();
+	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
+	addr_t upper = fetch_byte(pc + 2);
+	byte_t pg_no = upper;
+	upper = (upper << 8);
+	addr_t addr = upper + lower;
+	addr_t naddr = addr + fetch_Y();
+	byte_t npg_no = (naddr >> 8);
+	if (npg_no != pg_no) {
+		extra_cycles++;
+	}
+	byte_t operand = fetch_byte(naddr);
+	set_X(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return extra_cycles;
+}
+
 int ldyi() {}
 int ldyz() {}
 int ldyzy() {}
@@ -243,6 +403,7 @@ int sbciny() {}
 int sec() {}
 int sed() {}
 int sei() {}
+
 int staz() {
 	addr_t pc = fetch_PC();
 	addr_t addr = fetch_byte(pc + 1);
@@ -622,6 +783,13 @@ void record_state(state_t *s) {
 	s->S = fetch_S();
 	s->P = fetch_P();
 	s->PC = fetch_PC();
+	s->P_C = ((s->P & STATUS_C) == 0 ? 0 : 1);
+	s->P_Z = ((s->P & STATUS_Z) == 0 ? 0 : 1);
+	s->P_I = ((s->P & STATUS_I) == 0 ? 0 : 1);
+	s->P_D = ((s->P & STATUS_D) == 0 ? 0 : 1);
+	s->P_B = ((s->P & STATUS_B) == 0 ? 0 : 1);
+	s->P_V = ((s->P & STATUS_V) == 0 ? 0 : 1);
+	s->P_N = ((s->P & STATUS_N) == 0 ? 0 : 1);
 }
 
 FILE *disas_fp = NULL;
@@ -633,6 +801,8 @@ void disassembler_init() {
 		exit(EXIT_FAILURE);
 	}
 }
+
+
 
 void disassemble(byte_t opcode, state_t *s) {
 	addr_t pc = s->PC;
@@ -651,6 +821,13 @@ void disassemble(byte_t opcode, state_t *s) {
 	fprintf(disas_fp, "\tX:\t0x%x,%d\t\t0x%x,%d\n", s->X, s->X, fetch_X(), fetch_X());
 	fprintf(disas_fp, "\tY:\t0x%x,%d\t\t0x%x,%d\n", s->Y, s->Y, fetch_Y(), fetch_Y());
 	fprintf(disas_fp, "\tS:\t0x%x,%d\t\t0x%x,%d\n", s->S, s->S, fetch_S(), fetch_S());
-	fprintf(disas_fp, "\tP:\t0x%x,%d\t\t0x%x,%d\n", s->P, s->P, fetch_P(), fetch_P());
+	//fprintf(disas_fp, "\tP:\t0x%x,%d\t\t0x%x,%d\n", s->P, s->P, fetch_P(), fetch_P());
+	fprintf(disas_fp, "\tN V B D I Z C\t\tN V B D I Z C\n");
+	fprintf(disas_fp, "\t%d %d %d %d %d %d %d\t\t%d %d %d %d %d %d %d\n",
+			s->P_N, s->P_V, s->P_B, s->P_D, s->P_I, s->P_Z, s->P_C,
+			fetch_STATUS(STATUS_N), fetch_STATUS(STATUS_V), fetch_STATUS(STATUS_B),
+			fetch_STATUS(STATUS_D), fetch_STATUS(STATUS_I), fetch_STATUS(STATUS_Z),
+			fetch_STATUS(STATUS_C)
+		   );
 	fprintf(disas_fp, "\tPC:\t0x%x\t\t0x%x\n", s->PC, fetch_PC());
 }

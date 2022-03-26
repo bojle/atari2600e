@@ -10,7 +10,15 @@ typedef struct state_t {
 	byte_t S;			
 	byte_t P;			
 	addr_t PC;
+	_Bool P_C;
+	_Bool P_Z;
+	_Bool P_I;
+	_Bool P_D;
+	_Bool P_B;
+	_Bool P_V;
+	_Bool P_N;
 } state_t;
+
 
 void inst_tbl_init();
 

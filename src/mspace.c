@@ -16,20 +16,9 @@ static byte_t A;			/* Accumulator */
 static byte_t X;			/* General Purpose Register X */	
 static byte_t Y;			/* General Purpose Register X */	
 static byte_t S;			/* Stack Pointer */
-static byte_t P;			/* Program Status Word */
+static byte_t P = 32;		/* Program Status Word. 32 bcoz the 5th bit
+							   is supposed to be logical 1 at all times */
 static uint16_t PC;			/* Program Counter */
-
-#if 0
-static struct {
-	C:1    					/* Carry         (0=No Carry, 1=Carry)                      */
-	Z:1     				/* Zero          (0=Nonzero, 1=Zero)                        */
-	I:1     				/* IRQ Disable   (0=IRQ Enable, 1=IRQ Disable)              */
-	D:1     				/* Decimal Mode  (0=Normal, 1=BCD Mode for ADC/SBC opcodes) */
-	B:1     				/* Break Flag    (0=IRQ/NMI, 1=RESET or BRK/PHP opcode)     */
-	V:1     				/* Overflow      (0=No Overflow, 1=Overflow)                */
-	N:1     				/* Negative/Sign (0=Positive, 1=Negative)                   */
-} P;						/* Program Status Register */
-#endif 
 
 byte_t fetch_byte(addr_t addr) {
 	return mspace[addr];
@@ -82,6 +71,14 @@ void set_P(byte_t b) {
 
 byte_t fetch_P() {
 	return P;
+}
+
+void set_STATUS(enum status_t st) {
+	P |= st;
+}
+
+byte_t fetch_STATUS(enum status_t st) {
+	return ((P & st) == 0 ? 0 : 1);
 }
 
 void load_cartridge(char *filename) {
