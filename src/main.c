@@ -4,18 +4,27 @@
 #include "log.h"
 #include "mspace.h"
 
-int main() {
+int main(int argc, char *argv[]) {
+	if (argc < 2) {
+		fprintf(stderr, "Too few arguments\n");
+		return 1;
+	}
 	except_tbl_init();
 	inst_tbl_init();
-	load_cartridge("./bfr_dawn/thin");
+	load_cartridge(argv[1]);
 	set_PC(CARMEM_START);
 	
 	byte_t size = 0;
 	byte_t cycles = 0;
+	char *name;
 	for (addr_t pc = fetch_PC(); pc < CARMEM_END; ) {
+		printf("A: %d\n", fetch_A());
 		byte_t opcode = fetch_byte(pc);
-		exec(opcode, &size, &cycles);
-		printf("Opcode: %x\tSize: %d\tCycles: %d\n", opcode, size, cycles);
+		size = inst_bytes(opcode);
+		cycles = inst_cycles(opcode);
+		name = inst_name(opcode);
+		printf("Name: %s\tOpcode: %x\tSize: %d\tCycles: %d\n", name, opcode, size, cycles);
+		inst_exec(opcode);
 		pc += size;
 		set_PC(pc);
 	}
