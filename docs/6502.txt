@@ -110,8 +110,6 @@ the 6510 (the C64 processor).
   grams, and by the computer.
 
 
-
-
   ADDRESSING MODES
 
    Instructions need operands to work on. There are various ways of
@@ -258,7 +256,7 @@ the 6510 (the C64 processor).
   |     ADC   Add Memory to Accumulator with Carry
   |     AND   "AND" Memory with Accumulator
   |     ASL   Shift Left One Bit (Memory or Accumulator)
-  | |     BCC   Branch on Carry Clear
+  |     BCC   Branch on Carry Clear
   |     BCS   Branch on Carry Set
   |     BEQ   Branch on Result Zero
   |     BIT   Test Bits in Memory with Accumulator
