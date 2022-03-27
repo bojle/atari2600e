@@ -437,56 +437,70 @@ int sed(byte_t opcode) {}
 int sei(byte_t opcode) {}
 
 int staz(byte_t opcode) {
-	addr_t pc = fetch_PC();
-	addr_t addr = fetch_byte(pc + 1);
+	addr_t addr = fetch_operand(opcode);
 	set_byte(addr, fetch_A());
 	return 0;
 }
 int stazx(byte_t opcode) {
-	addr_t pc = fetch_PC();
-	addr_t addr = fetch_byte(pc + 1);
+	addr_t addr = fetch_operand(opcode);
 	addr += fetch_X();
 	set_byte(addr, fetch_A());
 	return 0;
 }
 int sta(byte_t opcode) {
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1);
-	addr_t upper = fetch_byte(pc + 2);
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
+	addr_t addr = fetch_operand(opcode);
 	set_byte(addr, fetch_A());
 	return 0;
 }
 int staax(byte_t opcode) {
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1);
-	addr_t upper = fetch_byte(pc + 2);
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
+	addr_t addr = fetch_operand(opcode);
 	addr += fetch_X();
 	set_byte(addr, fetch_A());
 	return 0;
 }
 int staay(byte_t opcode) {
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1);
-	addr_t upper = fetch_byte(pc + 2);
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
-	addr += fetch_X();
+	addr_t addr = fetch_operand(opcode);
+	addr += fetch_Y();
 	set_byte(addr, fetch_A());
 	return 0;
 }
 int stainx(byte_t opcode) {
 }
-int stainy(byte_t opcode) {}
-int stxz(byte_t opcode) {}
-int stxzy(byte_t opcode) {}
-int stx(byte_t opcode) {}
-int styz(byte_t opcode) {}
-int styzy(byte_t opcode) {}
-int sty(byte_t opcode) {}
+int stainy(byte_t opcode) {
+}
+int stxz(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	set_byte(addr, fetch_X());
+	return 0;
+}
+int stxzy(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	addr += fetch_Y();
+	set_byte(addr, fetch_X());
+	return 0;
+}
+int stx(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	set_byte(addr, fetch_X());
+	return 0;
+}
+int styz(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	set_byte(addr, fetch_Y());
+	return 0;
+}
+int styzx(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	addr += fetch_X();
+	set_byte(addr, fetch_Y());
+	return 0;
+}
+
+int sty(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	set_byte(addr, fetch_Y());
+	return 0;
+}
 int tax(byte_t opcode) {}
 int tay(byte_t opcode) {}
 int tsx(byte_t opcode) {}
@@ -672,7 +686,7 @@ void inst_tbl_init() {
 	inst_assign(0x8E, 3, 4, stx,"stx");
 
 	inst_assign(0x84, 2, 3, styz,"styz");
-	inst_assign(0x94, 2, 4, styzy,"styzy");
+	inst_assign(0x94, 2, 4, styzx,"styzx");
 	inst_assign(0x8C, 3, 4, sty,"sty");
 
 	inst_assign(0xaa, 1, 2, tax,"tax");
