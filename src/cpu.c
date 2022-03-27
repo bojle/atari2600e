@@ -40,6 +40,8 @@ static inst_t inst_tbl[INSTN];
 #define inst_assign(opcode, nbytes, ncycles, execfn, iname) \
 	inst_tbl[opcode].bytes = nbytes; inst_tbl[opcode].cycles = ncycles; inst_tbl[opcode].exec = execfn; inst_tbl[opcode].name = iname
 
+/************** INSTRUCTIONS ****************************/
+
 /* Add with carry immediate */
 int adci(byte_t opcode) {
 	byte_t operand = fetch_operand(opcode);
@@ -79,17 +81,232 @@ int aslz(byte_t opcode) {}
 int aslzx(byte_t opcode) {}
 int asl(byte_t opcode) {}
 int aslax(byte_t opcode) {}
-int bcc(byte_t opcode) {}
-int bcs(byte_t opcode) {}
-int beq(byte_t opcode) {}
+
+int bcc(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_C) != 0) {
+		return 0;
+	}
+
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+
+int bcs(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_C) != 1) {
+		return 0;
+	}
+
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+int beq(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_Z) != 1) {
+		return 0;
+	}
+
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
 int bitz(byte_t opcode) {}
 int bit(byte_t opcode) {}
-int bmi(byte_t opcode) {}
-int bne(byte_t opcode) {}
-int bpl(byte_t opcode) {}
+
+int bmi(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_N) != 1) {
+		return 0;
+	}
+
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+
+int bne(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_Z) != 0) {
+		return 0;
+	}
+
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+int bpl(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_N) != 0) {
+		return 0;
+	}
+
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+
 int brk(byte_t opcode) {}
-int bvc(byte_t opcode) {}
-int bvs(byte_t opcode) {}
+
+int bvc(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_V) != 0) {
+		return 0;
+	}
+
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+
+int bvs(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	if (fetch_STATUS(STATUS_V) != 1) {
+		return 0;
+	}
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+
 int clc(byte_t opcode) {}
 int cld(byte_t opcode) {}
 int cli(byte_t opcode) {}
@@ -501,16 +718,64 @@ int sty(byte_t opcode) {
 	set_byte(addr, fetch_Y());
 	return 0;
 }
-int tax(byte_t opcode) {}
-int tay(byte_t opcode) {}
+
+int tax(byte_t opcode) {
+	byte_t A = fetch_A();
+	set_X(A);
+	if ((A >> 7) == 1) {
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	return 0;	
+}
+int tay(byte_t opcode) {
+	byte_t A = fetch_A();
+	set_Y(A);
+	if ((A >> 7) == 1) {
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	return 0;	
+}
 int tsx(byte_t opcode) {}
-int txa(byte_t opcode) {}
+
+int txa(byte_t opcode) {
+	byte_t X = fetch_X();
+	set_A(X);
+	if ((X >> 7) == 1) {
+		set_STATUS(STATUS_N);
+	}
+	if (X == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	return 0;	
+}
+
 int txs(byte_t opcode) {}
-int tya(byte_t opcode) {}
+
+int tya(byte_t opcode) {
+	byte_t Y = fetch_Y();
+	set_A(Y);
+	if ((Y >> 7) == 1) {
+		set_STATUS(STATUS_N);
+	}
+	if (Y == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	return 0;	
+}
+
 int vac(byte_t opcode) {
 	log_fatal("Invalid/Vacant Instruction; Exiting");
 	exit(EXIT_FAILURE);
 }
+
+/******************* END ****************************/
+
 void inst_tbl_init() {
 	inst_assign(0x69, 2, 2, adci,"adci");
 	inst_assign(0x65, 2, 3, adcz,"adcz");
