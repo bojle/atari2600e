@@ -82,229 +82,86 @@ int aslzx(byte_t opcode) {}
 int asl(byte_t opcode) {}
 int aslax(byte_t opcode) {}
 
-int bcc(byte_t opcode) {
+int branch_aux(byte_t opcode) {
 	byte_t extra_cycles = 0;
+	addr_t pc = fetch_PC();
+	addr_t new_pc = pc;
+	byte_t offset = fetch_operand(opcode);
+	if (offset > 0x7f) { // Negative Number
+		/* Extracting a 2's complement number */
+		offset ^= 0xff;
+		offset += 1;
+		new_pc = pc - offset;
+	}
+	else {
+		new_pc = pc + offset;
+	}
+	if (page_boundary_crossed(pc, new_pc)) {
+		extra_cycles += 2;
+	}
+	else {
+		extra_cycles += 1;
+	}
+	set_PC(new_pc);
+	return extra_cycles;
+}
+
+int bcc(byte_t opcode) {
 	if (fetch_STATUS(STATUS_C) != 0) {
 		return 0;
 	}
-
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 
 int bcs(byte_t opcode) {
-	byte_t extra_cycles = 0;
 	if (fetch_STATUS(STATUS_C) != 1) {
 		return 0;
 	}
-
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 int beq(byte_t opcode) {
-	byte_t extra_cycles = 0;
 	if (fetch_STATUS(STATUS_Z) != 1) {
 		return 0;
 	}
-
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 int bitz(byte_t opcode) {}
 int bit(byte_t opcode) {}
 
 int bmi(byte_t opcode) {
-	byte_t extra_cycles = 0;
 	if (fetch_STATUS(STATUS_N) != 1) {
 		return 0;
 	}
-
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 
 int bne(byte_t opcode) {
-	byte_t extra_cycles = 0;
 	if (fetch_STATUS(STATUS_Z) != 0) {
 		return 0;
 	}
-
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 int bpl(byte_t opcode) {
-	byte_t extra_cycles = 0;
 	if (fetch_STATUS(STATUS_N) != 0) {
 		return 0;
 	}
-
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 
 int brk(byte_t opcode) {}
 
 int bvc(byte_t opcode) {
-	byte_t extra_cycles = 0;
 	if (fetch_STATUS(STATUS_V) != 0) {
 		return 0;
 	}
-
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 
 int bvs(byte_t opcode) {
-	byte_t extra_cycles = 0;
 	if (fetch_STATUS(STATUS_V) != 1) {
 		return 0;
 	}
-	addr_t pc = fetch_PC();
-	addr_t new_pc = pc;
-	byte_t offset = fetch_operand(opcode);
-	if (offset > 0x7f) { // Negative Number
-		/* Extracting a 2's complement number */
-		offset ^= 0xff;
-		offset += 1;
-		new_pc = pc - offset;
-	}
-	else {
-		new_pc = pc + offset;
-	}
-	if (page_boundary_crossed(pc, new_pc)) {
-		extra_cycles += 2;
-	}
-	else {
-		extra_cycles += 1;
-	}
-	set_PC(new_pc);
-	return extra_cycles;
+	return branch_aux(opcode);
 }
 
 int clc(byte_t opcode) {}

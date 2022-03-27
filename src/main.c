@@ -27,12 +27,6 @@ int main(int argc, char *argv[]) {
 		cycles = inst_cycles(opcode);
 		name = inst_name(opcode);
 		inst_exec(opcode);
-
-		/* 
-		 * If pc != fetch_PC(), some instruction modified it,
-		 * probably a branch instruction. Therfore, defer changing
-		 * PC
-		 */
 		pc = fetch_PC();
 		pc += size;
 		set_PC(pc);
