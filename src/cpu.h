@@ -26,6 +26,8 @@ char *inst_name(byte_t opcode);
 byte_t inst_bytes(byte_t opcode);
 byte_t inst_cycles(byte_t opcode);
 byte_t inst_exec(byte_t opcode);
+addr_t fetch_operand(byte_t opcode);
+byte_t page_boundary_crossed(addr_t old_addr, addr_t new_addr);
 
 void record_state(state_t *s);
 void disassembler_init();

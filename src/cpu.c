@@ -20,10 +20,8 @@
  * relative: name+r
  */
 
-typedef int (*inst_fptr) (void);
-
-/* Total Instructions */
-#define INSTN 256 	/* 2^8 */
+/* Function pointer type for an instruction-function. */
+typedef int (*inst_fptr) (byte_t opcode);
 
 typedef struct inst_t {
 	int bytes;
@@ -32,16 +30,19 @@ typedef struct inst_t {
 	char *name;
 } inst_t;
 
+/* Total Number of Instructions */
+#define INSTN 256 	/* 2^8 */
 
+/* Table that holds all the instructions and related information */
 static inst_t inst_tbl[INSTN];
 
+/* Used by inst_tbl_init() */
 #define inst_assign(opcode, nbytes, ncycles, execfn, iname) \
 	inst_tbl[opcode].bytes = nbytes; inst_tbl[opcode].cycles = ncycles; inst_tbl[opcode].exec = execfn; inst_tbl[opcode].name = iname
 
 /* Add with carry immediate */
-int adci() {
-	addr_t pc = fetch_PC();
-	byte_t operand = fetch_byte(pc + 1);
+int adci(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
 	byte_t A = fetch_A();
 	// TODO: Check for Overflow (STATUS_V)
 	if (A + operand > 255) {
@@ -57,83 +58,82 @@ int adci() {
 	set_A(A);
 	return 0;
 }
-int adcz() {
+int adcz(byte_t opcode) {
 }
-int adczx() {}
-int adc() {}
-int adcax() {}
-int adcay() {}
-int adcinx() {}
-int adciny() {}
-int andi() {}
-int andz() {}
-int andzx() {}
-int and() {}
-int andax() {}
-int andyx() {}
-int andinx() {}
-int andiny() {}
-int asla() {}
-int aslz() {}
-int aslzx() {}
-int asl() {}
-int aslax() {}
-int bcc() {}
-int bcs() {}
-int beq() {}
-int bitz() {}
-int bit() {}
-int bmi() {}
-int bne() {}
-int bpl() {}
-int brk() {}
-int bvc() {}
-int bvs() {}
-int clc() {}
-int cld() {}
-int cli() {}
-int clv() {}
-int cmpi() {}
-int cmpz() {}
-int cmpzx() {}
-int cmp() {}
-int cmpax() {}
-int cmpay() {}
-int cmpinx() {}
-int cmpiny() {}
-int cpxi() {}
-int cpxz() {}
-int cpx() {}
-int cpyi() {}
-int cpyz() {}
-int cpy() {}
-int decz() {}
-int deczx() {}
-int dec() {}
-int decax() {}
-int dex() {}
-int dey() {}
-int eori() {}
-int eorz() {}
-int eorzx() {}
-int eor() {}
-int eorax() {}
-int eoray() {}
-int eorinx() {}
-int eoriny() {}
-int incz() {}
-int inczx() {}
-int inc() {}
-int incax() {}
-int inx() {}
-int iny() {}
-int jmp() {}
-int jmpin() {}
-int jsr() {}
+int adczx(byte_t opcode) {}
+int adc(byte_t opcode) {}
+int adcax(byte_t opcode) {}
+int adcay(byte_t opcode) {}
+int adcinx(byte_t opcode) {}
+int adciny(byte_t opcode) {}
+int andi(byte_t opcode) {}
+int andz(byte_t opcode) {}
+int andzx(byte_t opcode) {}
+int and(byte_t opcode) {}
+int andax(byte_t opcode) {}
+int andyx(byte_t opcode) {}
+int andinx(byte_t opcode) {}
+int andiny(byte_t opcode) {}
+int asla(byte_t opcode) {}
+int aslz(byte_t opcode) {}
+int aslzx(byte_t opcode) {}
+int asl(byte_t opcode) {}
+int aslax(byte_t opcode) {}
+int bcc(byte_t opcode) {}
+int bcs(byte_t opcode) {}
+int beq(byte_t opcode) {}
+int bitz(byte_t opcode) {}
+int bit(byte_t opcode) {}
+int bmi(byte_t opcode) {}
+int bne(byte_t opcode) {}
+int bpl(byte_t opcode) {}
+int brk(byte_t opcode) {}
+int bvc(byte_t opcode) {}
+int bvs(byte_t opcode) {}
+int clc(byte_t opcode) {}
+int cld(byte_t opcode) {}
+int cli(byte_t opcode) {}
+int clv(byte_t opcode) {}
+int cmpi(byte_t opcode) {}
+int cmpz(byte_t opcode) {}
+int cmpzx(byte_t opcode) {}
+int cmp(byte_t opcode) {}
+int cmpax(byte_t opcode) {}
+int cmpay(byte_t opcode) {}
+int cmpinx(byte_t opcode) {}
+int cmpiny(byte_t opcode) {}
+int cpxi(byte_t opcode) {}
+int cpxz(byte_t opcode) {}
+int cpx(byte_t opcode) {}
+int cpyi(byte_t opcode) {}
+int cpyz(byte_t opcode) {}
+int cpy(byte_t opcode) {}
+int decz(byte_t opcode) {}
+int deczx(byte_t opcode) {}
+int dec(byte_t opcode) {}
+int decax(byte_t opcode) {}
+int dex(byte_t opcode) {}
+int dey(byte_t opcode) {}
+int eori(byte_t opcode) {}
+int eorz(byte_t opcode) {}
+int eorzx(byte_t opcode) {}
+int eor(byte_t opcode) {}
+int eorax(byte_t opcode) {}
+int eoray(byte_t opcode) {}
+int eorinx(byte_t opcode) {}
+int eoriny(byte_t opcode) {}
+int incz(byte_t opcode) {}
+int inczx(byte_t opcode) {}
+int inc(byte_t opcode) {}
+int incax(byte_t opcode) {}
+int inx(byte_t opcode) {}
+int iny(byte_t opcode) {}
+int jmp(byte_t opcode) {}
+int jmpin(byte_t opcode) {}
+int jsr(byte_t opcode) {}
 
-int ldai() {
-	addr_t pc = fetch_PC();
-	byte_t operand = fetch_byte(pc + 1);
+int ldai(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
 	set_A(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
@@ -144,9 +144,8 @@ int ldai() {
 	return 0;
 }
 
-int ldaz() {
-	addr_t pc = fetch_PC();
-	addr_t zaddr = fetch_byte(pc + 1);
+int ldaz(byte_t opcode) {
+	addr_t zaddr = fetch_operand(opcode);
 	byte_t operand = fetch_byte(zaddr);
 	set_A(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
@@ -157,9 +156,8 @@ int ldaz() {
 	}
 	return 0;
 }
-int ldazx() {
-	addr_t pc = fetch_PC();
-	addr_t zaddr = fetch_byte(pc + 1);
+int ldazx(byte_t opcode) {
+	addr_t zaddr = fetch_operand(opcode);
 	zaddr += fetch_X();
 	byte_t operand = fetch_byte(zaddr);
 	set_A(operand);
@@ -171,12 +169,8 @@ int ldazx() {
 	}
 	return 0;
 }
-int lda() {
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
-	addr_t upper = fetch_byte(pc + 2);
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
+int lda(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
 	byte_t operand = fetch_byte(addr);
 	set_A(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
@@ -187,20 +181,14 @@ int lda() {
 	}
 	return 0;
 }
-int ldaax() {
+int ldaax(byte_t opcode) {
 	byte_t extra_cycles = 0;
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
-	addr_t upper = fetch_byte(pc + 2);
-	byte_t pg_no = upper;
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
-	addr_t naddr = addr + fetch_X();
-	byte_t npg_no = (naddr >> 8);
-	if (npg_no != pg_no) {
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	if (page_boundary_crossed(addr, new_addr)) {
 		extra_cycles++;
 	}
-	byte_t operand = fetch_byte(naddr);
+	byte_t operand = fetch_byte(new_addr);
 	set_A(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
@@ -211,20 +199,14 @@ int ldaax() {
 	return extra_cycles;
 }
 
-int ldaay() {
+int ldaay(byte_t opcode) {
 	byte_t extra_cycles = 0;
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
-	addr_t upper = fetch_byte(pc + 2);
-	byte_t pg_no = upper;
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
-	addr_t naddr = addr + fetch_Y();
-	byte_t npg_no = (naddr >> 8);
-	if (npg_no != pg_no) {
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_Y();
+	if (page_boundary_crossed(addr, new_addr)) {
 		extra_cycles++;
 	}
-	byte_t operand = fetch_byte(naddr);
+	byte_t operand = fetch_byte(new_addr);
 	set_A(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
@@ -235,7 +217,8 @@ int ldaay() {
 	return extra_cycles;
 }
 
-int ldainx() {
+/* TODO: Refactor to include fetch_operands() */
+int ldainx(byte_t opcode) {
 	addr_t pc = fetch_PC();
 	byte_t operand = fetch_byte(pc + 1);
 	operand += fetch_X();
@@ -252,7 +235,8 @@ int ldainx() {
 	}
 	return 0;
 }
-int ldainy() {
+/* TODO: Refactor to include fetch_operands() */
+int ldainy(byte_t opcode) {
 	byte_t extra_cycles = 0;
 	addr_t pc = fetch_PC();
 	byte_t operand = fetch_byte(pc + 1);
@@ -276,9 +260,8 @@ int ldainy() {
 	return extra_cycles;
 }
 
-int ldxi() {
-	addr_t pc = fetch_PC();
-	byte_t operand = fetch_byte(pc + 1);
+int ldxi(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
 	set_X(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
@@ -288,9 +271,8 @@ int ldxi() {
 	}
 	return 0;
 }
-int ldxz() {
-	addr_t pc = fetch_PC();
-	addr_t zaddr = fetch_byte(pc + 1);
+int ldxz(byte_t opcode) {
+	addr_t zaddr = fetch_operand(opcode);
 	byte_t operand = fetch_byte(zaddr);
 	set_X(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
@@ -301,9 +283,8 @@ int ldxz() {
 	}
 	return 0;
 }
-int ldxzy() {
-	addr_t pc = fetch_PC();
-	addr_t zaddr = fetch_byte(pc + 1);
+int ldxzy(byte_t opcode) {
+	addr_t zaddr = fetch_operand(opcode);
 	zaddr += fetch_Y();
 	byte_t operand = fetch_byte(zaddr);
 	set_X(operand);
@@ -316,12 +297,8 @@ int ldxzy() {
 	return 0;
 }
 
-int ldx() {
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
-	addr_t upper = fetch_byte(pc + 2);
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
+int ldx(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
 	byte_t operand = fetch_byte(addr);
 	set_X(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
@@ -333,20 +310,14 @@ int ldx() {
 	return 0;
 }
 
-int ldxay() {
+int ldxay(byte_t opcode) {
 	byte_t extra_cycles = 0;
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1); // lower first because little-endian
-	addr_t upper = fetch_byte(pc + 2);
-	byte_t pg_no = upper;
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
-	addr_t naddr = addr + fetch_Y();
-	byte_t npg_no = (naddr >> 8);
-	if (npg_no != pg_no) {
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_Y();
+	if (page_boundary_crossed(addr, new_addr)) {
 		extra_cycles++;
 	}
-	byte_t operand = fetch_byte(naddr);
+	byte_t operand = fetch_byte(new_addr);
 	set_X(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
@@ -357,67 +328,128 @@ int ldxay() {
 	return extra_cycles;
 }
 
-int ldyi() {}
-int ldyz() {}
-int ldyzy() {}
-int ldy() {}
-int ldyay() {}
-int lsra() {}
-int lsrz() {}
-int lsrzx() {}
-int lsr() {}
-int lsrax() {}
-int nop() {}
-int orai() {}
-int oraz() {}
-int orazx() {}
-int ora() {}
-int oraax() {}
-int oraay() {}
-int orainx() {}
-int orainy() {}
-int pha() {}
-int php() {}
-int pla() {}
-int plp() {}
-int rola() {}
-int rolz() {}
-int rolzx() {}
-int rol() {}
-int rolax() {}
-int rora() {}
-int rorz() {}
-int rorzx() {}
-int ror() {}
-int rorax() {}
-int rti() {}
-int rts() {}
-int sbci() {}
-int sbcz() {}
-int sbczx() {}
-int sbca() {}
-int sbcax() {}
-int sbcay() {}
-int sbcinx() {}
-int sbciny() {}
-int sec() {}
-int sed() {}
-int sei() {}
+int ldyi(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
+	set_Y(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+int ldyz(byte_t opcode) {
+	addr_t zaddr = fetch_operand(opcode);
+	byte_t operand = fetch_byte(zaddr);
+	set_Y(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+int ldyzx(byte_t opcode) {
+	addr_t zaddr = fetch_operand(opcode);
+	zaddr += fetch_X();
+	byte_t operand = fetch_byte(zaddr);
+	set_Y(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+int ldy(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	byte_t operand = fetch_byte(addr);
+	set_X(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return 0;
+}
+int ldyax(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_Y();
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t operand = fetch_byte(new_addr);
+	set_X(operand);
+	if ((operand >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	return extra_cycles;
+}
 
-int staz() {
+int lsra(byte_t opcode) {}
+int lsrz(byte_t opcode) {}
+int lsrzx(byte_t opcode) {}
+int lsr(byte_t opcode) {}
+int lsrax(byte_t opcode) {}
+int nop(byte_t opcode) {}
+int orai(byte_t opcode) {}
+int oraz(byte_t opcode) {}
+int orazx(byte_t opcode) {}
+int ora(byte_t opcode) {}
+int oraax(byte_t opcode) {}
+int oraay(byte_t opcode) {}
+int orainx(byte_t opcode) {}
+int orainy(byte_t opcode) {}
+int pha(byte_t opcode) {}
+int php(byte_t opcode) {}
+int pla(byte_t opcode) {}
+int plp(byte_t opcode) {}
+int rola(byte_t opcode) {}
+int rolz(byte_t opcode) {}
+int rolzx(byte_t opcode) {}
+int rol(byte_t opcode) {}
+int rolax(byte_t opcode) {}
+int rora(byte_t opcode) {}
+int rorz(byte_t opcode) {}
+int rorzx(byte_t opcode) {}
+int ror(byte_t opcode) {}
+int rorax(byte_t opcode) {}
+int rti(byte_t opcode) {}
+int rts(byte_t opcode) {}
+int sbci(byte_t opcode) {}
+int sbcz(byte_t opcode) {}
+int sbczx(byte_t opcode) {}
+int sbca(byte_t opcode) {}
+int sbcax(byte_t opcode) {}
+int sbcay(byte_t opcode) {}
+int sbcinx(byte_t opcode) {}
+int sbciny(byte_t opcode) {}
+int sec(byte_t opcode) {}
+int sed(byte_t opcode) {}
+int sei(byte_t opcode) {}
+
+int staz(byte_t opcode) {
 	addr_t pc = fetch_PC();
 	addr_t addr = fetch_byte(pc + 1);
 	set_byte(addr, fetch_A());
 	return 0;
 }
-int stazx() {
+int stazx(byte_t opcode) {
 	addr_t pc = fetch_PC();
 	addr_t addr = fetch_byte(pc + 1);
 	addr += fetch_X();
 	set_byte(addr, fetch_A());
 	return 0;
 }
-int sta() {
+int sta(byte_t opcode) {
 	addr_t pc = fetch_PC();
 	addr_t lower = fetch_byte(pc + 1);
 	addr_t upper = fetch_byte(pc + 2);
@@ -426,17 +458,7 @@ int sta() {
 	set_byte(addr, fetch_A());
 	return 0;
 }
-int staax() {
-	addr_t pc = fetch_PC();
-	addr_t lower = fetch_byte(pc + 1);
-	addr_t upper = fetch_byte(pc + 2);
-	upper = (upper << 8);
-	addr_t addr = upper + lower;
-	addr += fetch_X();
-	set_byte(addr, fetch_A());
-	return 0;
-}
-int staay() {
+int staax(byte_t opcode) {
 	addr_t pc = fetch_PC();
 	addr_t lower = fetch_byte(pc + 1);
 	addr_t upper = fetch_byte(pc + 2);
@@ -446,26 +468,35 @@ int staay() {
 	set_byte(addr, fetch_A());
 	return 0;
 }
-int stainx() {
+int staay(byte_t opcode) {
+	addr_t pc = fetch_PC();
+	addr_t lower = fetch_byte(pc + 1);
+	addr_t upper = fetch_byte(pc + 2);
+	upper = (upper << 8);
+	addr_t addr = upper + lower;
+	addr += fetch_X();
+	set_byte(addr, fetch_A());
+	return 0;
 }
-int stainy() {}
-int stxz() {}
-int stxzy() {}
-int stx() {}
-int styz() {}
-int styzy() {}
-int sty() {}
-int tax() {}
-int tay() {}
-int tsx() {}
-int txa() {}
-int txs() {}
-int tya() {}
-int vac() {
+int stainx(byte_t opcode) {
+}
+int stainy(byte_t opcode) {}
+int stxz(byte_t opcode) {}
+int stxzy(byte_t opcode) {}
+int stx(byte_t opcode) {}
+int styz(byte_t opcode) {}
+int styzy(byte_t opcode) {}
+int sty(byte_t opcode) {}
+int tax(byte_t opcode) {}
+int tay(byte_t opcode) {}
+int tsx(byte_t opcode) {}
+int txa(byte_t opcode) {}
+int txs(byte_t opcode) {}
+int tya(byte_t opcode) {}
+int vac(byte_t opcode) {
 	log_fatal("Invalid/Vacant Instruction; Exiting");
 	exit(EXIT_FAILURE);
 }
-
 void inst_tbl_init() {
 	inst_assign(0x69, 2, 2, adci,"adci");
 	inst_assign(0x65, 2, 3, adcz,"adcz");
@@ -573,9 +604,9 @@ void inst_tbl_init() {
 
 	inst_assign(0xA0, 2, 2, ldyi,"ldyi");
 	inst_assign(0xA4, 2, 3, ldyz,"ldyz");
-	inst_assign(0xB4, 2, 4, ldyzy,"ldyzy");
+	inst_assign(0xB4, 2, 4, ldyzx,"ldyzx");
 	inst_assign(0xAC, 3, 4, ldy,"ldy");
-	inst_assign(0xBC, 3, 4, ldyay,"ldyay");
+	inst_assign(0xBC, 3, 4, ldyax,"ldyax");
 
 	inst_assign(0x4A, 1, 2, lsra,"lsra");
 	inst_assign(0x46, 2, 5, lsrz,"lsrz");
@@ -772,7 +803,30 @@ byte_t inst_cycles(byte_t opcode) {
 }
 
 byte_t inst_exec(byte_t opcode) {
-	return ((inst_tbl[opcode])).exec();
+	return ((inst_tbl[opcode])).exec(opcode);
+}
+
+addr_t fetch_operand(byte_t opcode) {
+	addr_t pc = fetch_PC();
+	pc++;
+	addr_t operand = 0;
+	byte_t size = inst_bytes(opcode);
+	byte_t byte = 0;
+	/* Bytes are stored in the memory in little-endian order */
+	for (int i = 0; i < size-1; ++i) {
+		byte = fetch_byte(pc++);
+		operand += (byte << (8 * i));
+	}
+	return operand;
+}
+
+/* If the high byte of two addresses are the same, they belong to the
+ * same 'page'
+ */
+byte_t page_boundary_crossed(addr_t old_addr, addr_t new_addr) {
+	byte_t old_pgno = (old_addr >> 8);
+	byte_t new_pgno = (new_addr >> 8);
+	return (old_pgno != new_pgno);
 }
 
 
@@ -792,8 +846,11 @@ void record_state(state_t *s) {
 	s->P_N = ((s->P & STATUS_N) == 0 ? 0 : 1);
 }
 
+/* File that disassemble() will output to */
 FILE *disas_fp = NULL;
+/* Name of the said file */
 #define DISAS_FILENAME "dis.asm"
+
 void disassembler_init() {
 	disas_fp = fopen(DISAS_FILENAME, "w+");
 	if (!disas_fp) {
