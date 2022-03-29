@@ -61,26 +61,243 @@ int adci(byte_t opcode) {
 	return 0;
 }
 int adcz(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	byte_t A = fetch_A();
+	if (A + value > 255) {
+		set_STATUS(STATUS_C);
+	}
+	A += value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
 }
-int adczx(byte_t opcode) {}
-int adc(byte_t opcode) {}
-int adcax(byte_t opcode) {}
-int adcay(byte_t opcode) {}
-int adcinx(byte_t opcode) {}
-int adciny(byte_t opcode) {}
-int andi(byte_t opcode) {}
-int andz(byte_t opcode) {}
-int andzx(byte_t opcode) {}
-int and(byte_t opcode) {}
-int andax(byte_t opcode) {}
-int andyx(byte_t opcode) {}
+int adczx(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	operand += fetch_X();
+	byte_t value = fetch_byte(operand);
+	byte_t A = fetch_A();
+	if (A + value > 255) {
+		set_STATUS(STATUS_C);
+	}
+	A += value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int adc(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	byte_t A = fetch_A();
+	if (A + value > 255) {
+		set_STATUS(STATUS_C);
+	}
+	A += value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int adcax(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t value = fetch_byte(new_addr);
+	byte_t A = fetch_A();
+	if (A + value > 255) {
+		set_STATUS(STATUS_C);
+	}
+	A += value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+int adcay(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_Y();
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t value = fetch_byte(new_addr);
+	byte_t A = fetch_A();
+	if (A + value > 255) {
+		set_STATUS(STATUS_C);
+	}
+	A += value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
+int adcinx(byte_t opcode) {
+	
+}
+int adciny(byte_t opcode) {
+
+}
+
+int andi(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
+	byte_t A = fetch_A();
+	A &= operand;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int andz(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	byte_t A = fetch_A();
+	A &= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int andzx(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	operand += fetch_X();
+	byte_t value = fetch_byte(operand);
+	byte_t A = fetch_A();
+	A &= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int and(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	byte_t value = fetch_byte(addr);
+	byte_t A = fetch_A();
+	A &= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int andax(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t A = fetch_A();
+	A &= value;	
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
+int anday(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t A = fetch_A();
+	A &= value;	
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
 int andinx(byte_t opcode) {}
 int andiny(byte_t opcode) {}
-int asla(byte_t opcode) {}
-int aslz(byte_t opcode) {}
-int aslzx(byte_t opcode) {}
-int asl(byte_t opcode) {}
-int aslax(byte_t opcode) {}
+
+int asla(byte_t opcode) {
+	byte_t A = fetch_A();
+	byte_t seventh_bit = (A >> 7);
+	(seventh_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	A <<= 7;
+	set_A(A);
+	return 0;
+}
+int aslz(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	byte_t seventh_bit = (value >> 7);
+	(seventh_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	value <<= 7;
+	set_byte(operand, value);
+	return 0;
+}
+int aslzx(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	byte_t seventh_bit = (value >> 7);
+	(seventh_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	value <<= 7;
+	set_byte(addr, value);
+	return 0;
+}
+
+int asl(byte_t opcode) {
+	return aslz(opcode);
+}
+
+int aslax(byte_t opcode) {
+	return aslzx(opcode);
+}
 
 int branch_aux(byte_t opcode) {
 	byte_t extra_cycles = 0;
@@ -125,6 +342,7 @@ int beq(byte_t opcode) {
 	}
 	return branch_aux(opcode);
 }
+
 int bitz(byte_t opcode) {}
 int bit(byte_t opcode) {}
 
@@ -164,12 +382,24 @@ int bvs(byte_t opcode) {
 	return branch_aux(opcode);
 }
 
-int clc(byte_t opcode) {}
-int cld(byte_t opcode) {}
-int cli(byte_t opcode) {}
-int clv(byte_t opcode) {}
-int cmpi(byte_t opcode) {}
+int clc(byte_t opcode) {
+	clear_STATUS(STATUS_C);
+}
+int cld(byte_t opcode) {
+	clear_STATUS(STATUS_D);
+}
+int cli(byte_t opcode) {
+	clear_STATUS(STATUS_I);
+}
+int clv(byte_t opcode) {
+	clear_STATUS(STATUS_V);
+}
+
+int cmpi(byte_t opcode) {
+}
+
 int cmpz(byte_t opcode) {}
+
 int cmpzx(byte_t opcode) {}
 int cmp(byte_t opcode) {}
 int cmpax(byte_t opcode) {}
@@ -363,9 +593,7 @@ int ldxzy(byte_t opcode) {
 	byte_t operand = fetch_byte(zaddr);
 	set_X(operand);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
-		set_STATUS(STATUS_N);
-	}
-	if (operand == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_N); } if (operand == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
 	return 0;
@@ -648,7 +876,7 @@ void inst_tbl_init() {
 	inst_assign(0x35, 2, 4, andzx,"andzx");
 	inst_assign(0x2D, 3, 4, and,"and");
 	inst_assign(0x3D, 3, 4, andax,"andax");
-	inst_assign(0x39, 3, 4, andyx,"andyx");
+	inst_assign(0x39, 3, 4, anday,"anday");
 	inst_assign(0x21, 2, 6, andinx,"andinx");
 	inst_assign(0x31, 2, 5, andiny,"andiny");
 
@@ -818,110 +1046,58 @@ void inst_tbl_init() {
 	inst_assign(0x9a, 1, 2, txs,"txs");
 	inst_assign(0x98, 1, 2, tya,"tya");
 	/********* Vacant ************/
-	inst_assign(0x02, 0, 0, vac,"vac");
-	inst_assign(0x03, 0, 0, vac,"vac");
-	inst_assign(0x04, 0, 0, vac,"vac");
-	inst_assign(0x07, 0, 0, vac,"vac");
-	inst_assign(0x0B, 0, 0, vac,"vac");
-	inst_assign(0x0C, 0, 0, vac,"vac");
-	inst_assign(0x0F, 0, 0, vac,"vac");
-	inst_assign(0x12, 0, 0, vac,"vac");
-	inst_assign(0x13, 0, 0, vac,"vac");
-	inst_assign(0x14, 0, 0, vac,"vac");
-	inst_assign(0x17, 0, 0, vac,"vac");
-	inst_assign(0x1A, 0, 0, vac,"vac");
-	inst_assign(0x1B, 0, 0, vac,"vac");
-	inst_assign(0x1C, 0, 0, vac,"vac");
-	inst_assign(0x1F, 0, 0, vac,"vac");
-	inst_assign(0x42, 0, 0, vac,"vac");
-	inst_assign(0x43, 0, 0, vac,"vac");
-	inst_assign(0x44, 0, 0, vac,"vac");
-	inst_assign(0x47, 0, 0, vac,"vac");
-	inst_assign(0x4B, 0, 0, vac,"vac");
-	inst_assign(0x4F, 0, 0, vac,"vac");
-	inst_assign(0x52, 0, 0, vac,"vac");
-	inst_assign(0x53, 0, 0, vac,"vac");
-	inst_assign(0x54, 0, 0, vac,"vac");
-	inst_assign(0x57, 0, 0, vac,"vac");
-	inst_assign(0x5A, 0, 0, vac,"vac");
-	inst_assign(0x5B, 0, 0, vac,"vac");
-	inst_assign(0x5C, 0, 0, vac,"vac");
-	inst_assign(0x5F, 0, 0, vac,"vac");
-	inst_assign(0x80, 0, 0, vac,"vac");
-	inst_assign(0x82, 0, 0, vac,"vac");
-	inst_assign(0x83, 0, 0, vac,"vac");
-	inst_assign(0x87, 0, 0, vac,"vac");
-	inst_assign(0x89, 0, 0, vac,"vac");
-	inst_assign(0x8B, 0, 0, vac,"vac");
-	inst_assign(0x8F, 0, 0, vac,"vac");
-	inst_assign(0x92, 0, 0, vac,"vac");
-	inst_assign(0x93, 0, 0, vac,"vac");
-	inst_assign(0x97, 0, 0, vac,"vac");
-	inst_assign(0x9B, 0, 0, vac,"vac");
-	inst_assign(0x9C, 0, 0, vac,"vac");
-	inst_assign(0x9E, 0, 0, vac,"vac");
-	inst_assign(0x9F, 0, 0, vac,"vac");
-	inst_assign(0xC2, 0, 0, vac,"vac");
-	inst_assign(0xC3, 0, 0, vac,"vac");
-	inst_assign(0xC7, 0, 0, vac,"vac");
-	inst_assign(0xCB, 0, 0, vac,"vac");
-	inst_assign(0xCF, 0, 0, vac,"vac");
-	inst_assign(0xD2, 0, 0, vac,"vac");
-	inst_assign(0xD3, 0, 0, vac,"vac");
-	inst_assign(0xD4, 0, 0, vac,"vac");
-	inst_assign(0xD7, 0, 0, vac,"vac");
-	inst_assign(0xDA, 0, 0, vac,"vac");
-	inst_assign(0xDB, 0, 0, vac,"vac");
-	inst_assign(0xDC, 0, 0, vac,"vac");
-	inst_assign(0xDF, 0, 0, vac,"vac");
-	inst_assign(0x22, 0, 0, vac,"vac");
-	inst_assign(0x23, 0, 0, vac,"vac");
-	inst_assign(0x27, 0, 0, vac,"vac");
-	inst_assign(0x2B, 0, 0, vac,"vac");
-	inst_assign(0x2F, 0, 0, vac,"vac");
-	inst_assign(0x32, 0, 0, vac,"vac");
-	inst_assign(0x33, 0, 0, vac,"vac");
-	inst_assign(0x34, 0, 0, vac,"vac");
-	inst_assign(0x37, 0, 0, vac,"vac");
-	inst_assign(0x3A, 0, 0, vac,"vac");
-	inst_assign(0x3B, 0, 0, vac,"vac");
-	inst_assign(0x3C, 0, 0, vac,"vac");
-	inst_assign(0x3F, 0, 0, vac,"vac");
-	inst_assign(0x62, 0, 0, vac,"vac");
-	inst_assign(0x63, 0, 0, vac,"vac");
-	inst_assign(0x64, 0, 0, vac,"vac");
-	inst_assign(0x67, 0, 0, vac,"vac");
-	inst_assign(0x6B, 0, 0, vac,"vac");
-	inst_assign(0x6F, 0, 0, vac,"vac");
-	inst_assign(0x72, 0, 0, vac,"vac");
-	inst_assign(0x73, 0, 0, vac,"vac");
-	inst_assign(0x74, 0, 0, vac,"vac");
-	inst_assign(0x77, 0, 0, vac,"vac");
-	inst_assign(0x7A, 0, 0, vac,"vac");
-	inst_assign(0x7B, 0, 0, vac,"vac");
-	inst_assign(0x7C, 0, 0, vac,"vac");
-	inst_assign(0x7F, 0, 0, vac,"vac");
-	inst_assign(0xA3, 0, 0, vac,"vac");
-	inst_assign(0xA7, 0, 0, vac,"vac");
-	inst_assign(0xAB, 0, 0, vac,"vac");
-	inst_assign(0xAF, 0, 0, vac,"vac");
-	inst_assign(0xB2, 0, 0, vac,"vac");
-	inst_assign(0xB3, 0, 0, vac,"vac");
-	inst_assign(0xB7, 0, 0, vac,"vac");
-	inst_assign(0xBB, 0, 0, vac,"vac");
-	inst_assign(0xBF, 0, 0, vac,"vac");
-	inst_assign(0xE2, 0, 0, vac,"vac");
-	inst_assign(0xE3, 0, 0, vac,"vac");
-	inst_assign(0xE7, 0, 0, vac,"vac");
-	inst_assign(0xEB, 0, 0, vac,"vac");
-	inst_assign(0xEF, 0, 0, vac,"vac");
-	inst_assign(0xF2, 0, 0, vac,"vac");
-	inst_assign(0xF3, 0, 0, vac,"vac");
-	inst_assign(0xF4, 0, 0, vac,"vac");
-	inst_assign(0xF7, 0, 0, vac,"vac");
-	inst_assign(0xFA, 0, 0, vac,"vac");
-	inst_assign(0xFB, 0, 0, vac,"vac");
-	inst_assign(0xFC, 0, 0, vac,"vac");
+	inst_assign(0x02, 0, 0, vac,"vac"); inst_assign(0x03, 0, 0, vac,"vac");
+	inst_assign(0x04, 0, 0, vac,"vac"); inst_assign(0x07, 0, 0, vac,"vac");
+	inst_assign(0x0B, 0, 0, vac,"vac"); inst_assign(0x0C, 0, 0, vac,"vac");
+	inst_assign(0x0F, 0, 0, vac,"vac"); inst_assign(0x12, 0, 0, vac,"vac");
+	inst_assign(0x13, 0, 0, vac,"vac"); inst_assign(0x14, 0, 0, vac,"vac");
+	inst_assign(0x17, 0, 0, vac,"vac"); inst_assign(0x1A, 0, 0, vac,"vac");
+	inst_assign(0x1B, 0, 0, vac,"vac"); inst_assign(0x1C, 0, 0, vac,"vac");
+	inst_assign(0x1F, 0, 0, vac,"vac"); inst_assign(0x42, 0, 0, vac,"vac");
+	inst_assign(0x43, 0, 0, vac,"vac"); inst_assign(0x44, 0, 0, vac,"vac");
+	inst_assign(0x47, 0, 0, vac,"vac"); inst_assign(0x4B, 0, 0, vac,"vac");
+	inst_assign(0x4F, 0, 0, vac,"vac"); inst_assign(0x52, 0, 0, vac,"vac");
+	inst_assign(0x53, 0, 0, vac,"vac"); inst_assign(0x54, 0, 0, vac,"vac");
+	inst_assign(0x57, 0, 0, vac,"vac"); inst_assign(0x5A, 0, 0, vac,"vac");
+	inst_assign(0x5B, 0, 0, vac,"vac"); inst_assign(0x5C, 0, 0, vac,"vac");
+	inst_assign(0x5F, 0, 0, vac,"vac"); inst_assign(0x80, 0, 0, vac,"vac");
+	inst_assign(0x82, 0, 0, vac,"vac"); inst_assign(0x83, 0, 0, vac,"vac");
+	inst_assign(0x87, 0, 0, vac,"vac"); inst_assign(0x89, 0, 0, vac,"vac");
+	inst_assign(0x8B, 0, 0, vac,"vac"); inst_assign(0x8F, 0, 0, vac,"vac");
+	inst_assign(0x92, 0, 0, vac,"vac"); inst_assign(0x93, 0, 0, vac,"vac");
+	inst_assign(0x97, 0, 0, vac,"vac"); inst_assign(0x9B, 0, 0, vac,"vac");
+	inst_assign(0x9C, 0, 0, vac,"vac"); inst_assign(0x9E, 0, 0, vac,"vac");
+	inst_assign(0x9F, 0, 0, vac,"vac"); inst_assign(0xC2, 0, 0, vac,"vac");
+	inst_assign(0xC3, 0, 0, vac,"vac"); inst_assign(0xC7, 0, 0, vac,"vac");
+	inst_assign(0xCB, 0, 0, vac,"vac"); inst_assign(0xCF, 0, 0, vac,"vac");
+	inst_assign(0xD2, 0, 0, vac,"vac"); inst_assign(0xD3, 0, 0, vac,"vac");
+	inst_assign(0xD4, 0, 0, vac,"vac"); inst_assign(0xD7, 0, 0, vac,"vac");
+	inst_assign(0xDA, 0, 0, vac,"vac"); inst_assign(0xDB, 0, 0, vac,"vac");
+	inst_assign(0xDC, 0, 0, vac,"vac"); inst_assign(0xDF, 0, 0, vac,"vac");
+	inst_assign(0x22, 0, 0, vac,"vac"); inst_assign(0x23, 0, 0, vac,"vac");
+	inst_assign(0x27, 0, 0, vac,"vac"); inst_assign(0x2B, 0, 0, vac,"vac");
+	inst_assign(0x2F, 0, 0, vac,"vac"); inst_assign(0x32, 0, 0, vac,"vac");
+	inst_assign(0x33, 0, 0, vac,"vac"); inst_assign(0x34, 0, 0, vac,"vac");
+	inst_assign(0x37, 0, 0, vac,"vac"); inst_assign(0x3A, 0, 0, vac,"vac");
+	inst_assign(0x3B, 0, 0, vac,"vac"); inst_assign(0x3C, 0, 0, vac,"vac");
+	inst_assign(0x3F, 0, 0, vac,"vac"); inst_assign(0x62, 0, 0, vac,"vac");
+	inst_assign(0x63, 0, 0, vac,"vac"); inst_assign(0x64, 0, 0, vac,"vac");
+	inst_assign(0x67, 0, 0, vac,"vac"); inst_assign(0x6B, 0, 0, vac,"vac");
+	inst_assign(0x6F, 0, 0, vac,"vac"); inst_assign(0x72, 0, 0, vac,"vac");
+	inst_assign(0x73, 0, 0, vac,"vac"); inst_assign(0x74, 0, 0, vac,"vac");
+	inst_assign(0x77, 0, 0, vac,"vac"); inst_assign(0x7A, 0, 0, vac,"vac");
+	inst_assign(0x7B, 0, 0, vac,"vac"); inst_assign(0x7C, 0, 0, vac,"vac");
+	inst_assign(0x7F, 0, 0, vac,"vac"); inst_assign(0xA3, 0, 0, vac,"vac");
+	inst_assign(0xA7, 0, 0, vac,"vac"); inst_assign(0xAB, 0, 0, vac,"vac");
+	inst_assign(0xAF, 0, 0, vac,"vac"); inst_assign(0xB2, 0, 0, vac,"vac");
+	inst_assign(0xB3, 0, 0, vac,"vac"); inst_assign(0xB7, 0, 0, vac,"vac");
+	inst_assign(0xBB, 0, 0, vac,"vac"); inst_assign(0xBF, 0, 0, vac,"vac");
+	inst_assign(0xE2, 0, 0, vac,"vac"); inst_assign(0xE3, 0, 0, vac,"vac");
+	inst_assign(0xE7, 0, 0, vac,"vac"); inst_assign(0xEB, 0, 0, vac,"vac");
+	inst_assign(0xEF, 0, 0, vac,"vac"); inst_assign(0xF2, 0, 0, vac,"vac");
+	inst_assign(0xF3, 0, 0, vac,"vac"); inst_assign(0xF4, 0, 0, vac,"vac");
+	inst_assign(0xF7, 0, 0, vac,"vac"); inst_assign(0xFA, 0, 0, vac,"vac");
+	inst_assign(0xFB, 0, 0, vac,"vac"); inst_assign(0xFC, 0, 0, vac,"vac");
 	inst_assign(0xFF, 0, 0, vac,"vac");
 	log_trace("inst_tbl_init(): Initialized Instruction Table");
 }

@@ -108,6 +108,7 @@ byte_t fetch_P();
 
 void set_STATUS(enum status_t st);
 byte_t fetch_STATUS(enum status_t st);
+void clear_STATUS(enum status_t st);
 
 void load_cartridge(char *filename);
 

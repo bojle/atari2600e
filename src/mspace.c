@@ -77,6 +77,10 @@ void set_STATUS(enum status_t st) {
 	P |= st;
 }
 
+void clear_STATUS(enum status_t st) {
+	P &= (~st);
+}
+
 byte_t fetch_STATUS(enum status_t st) {
 	return ((P & st) == 0 ? 0 : 1);
 }
