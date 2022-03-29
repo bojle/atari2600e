@@ -441,10 +441,10 @@ int deczx(byte_t opcode) {
 	return 0;
 }
 int dec(byte_t opcode) {
-	return decz;
+	return decz(opcode);
 }
 int decax(byte_t opcode) {
-	return deczx;
+	return deczx(opcode);
 }
 int dex(byte_t opcode) {
 	byte_t value = fetch_X();
@@ -808,17 +808,44 @@ int ldyax(byte_t opcode) {
 }
 
 int lsra(byte_t opcode) {
-
+	byte_t A = fetch_A();
+	byte_t first_bit = (A & 0x01);
+	(first_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	A >>= 7;
+	set_A(A);
+	return 0;
 }
+
 int lsrz(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	byte_t first_bit = (value & 0x01);
+	(first_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	value >>= 7;
+	set_byte(operand, value);
+	return 0;
+}
 
-}
 int lsrzx(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	byte_t first_bit = (value & 0x01);
+	(first_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	value >>= 7;
+	set_byte(new_addr, value);
+	return 0;
 }
+
 int lsr(byte_t opcode) {
+	return lsrz(opcode);
 }
-int lsrax(byte_t opcode) {}
+int lsrax(byte_t opcode) {
+	return lsrzx(opcode);
+}
+
 int nop(byte_t opcode) {}
+
 int orai(byte_t opcode) {}
 int oraz(byte_t opcode) {}
 int orazx(byte_t opcode) {}
@@ -827,10 +854,12 @@ int oraax(byte_t opcode) {}
 int oraay(byte_t opcode) {}
 int orainx(byte_t opcode) {}
 int orainy(byte_t opcode) {}
+
 int pha(byte_t opcode) {}
 int php(byte_t opcode) {}
 int pla(byte_t opcode) {}
 int plp(byte_t opcode) {}
+
 int rola(byte_t opcode) {}
 int rolz(byte_t opcode) {}
 int rolzx(byte_t opcode) {}
@@ -851,9 +880,16 @@ int sbcax(byte_t opcode) {}
 int sbcay(byte_t opcode) {}
 int sbcinx(byte_t opcode) {}
 int sbciny(byte_t opcode) {}
-int sec(byte_t opcode) {}
-int sed(byte_t opcode) {}
-int sei(byte_t opcode) {}
+
+int sec(byte_t opcode) {
+	set_STATUS(STATUS_C);
+}
+int sed(byte_t opcode) {
+	set_STATUS(STATUS_D);
+}
+int sei(byte_t opcode) {
+	set_STATUS(STATUS_I);
+}
 
 int staz(byte_t opcode) {
 	addr_t addr = fetch_operand(opcode);
@@ -943,6 +979,7 @@ int tay(byte_t opcode) {
 	}
 	return 0;	
 }
+
 int tsx(byte_t opcode) {}
 
 int txa(byte_t opcode) {
