@@ -266,8 +266,14 @@ int andiny(byte_t opcode) {}
 int asla(byte_t opcode) {
 	byte_t A = fetch_A();
 	byte_t seventh_bit = (A >> 7);
+	A <<= 1;
 	(seventh_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
-	A <<= 7;
+	if (A == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
 	set_A(A);
 	return 0;
 }
@@ -275,8 +281,14 @@ int aslz(byte_t opcode) {
 	addr_t operand = fetch_operand(opcode);
 	byte_t value = fetch_byte(operand);
 	byte_t seventh_bit = (value >> 7);
+	value <<= 1;
 	(seventh_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
-	value <<= 7;
+	if (value == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
 	set_byte(operand, value);
 	return 0;
 }
@@ -285,8 +297,14 @@ int aslzx(byte_t opcode) {
 	addr_t new_addr = addr + fetch_X();
 	byte_t value = fetch_byte(new_addr);
 	byte_t seventh_bit = (value >> 7);
+	value <<= 1;
 	(seventh_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
-	value <<= 7;
+	if (value == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
 	set_byte(new_addr, value);
 	return 0;
 }
@@ -810,8 +828,12 @@ int ldyax(byte_t opcode) {
 int lsra(byte_t opcode) {
 	byte_t A = fetch_A();
 	byte_t first_bit = (A & 0x01);
+	A >>= 1;
+	clear_STATUS(STATUS_N);
 	(first_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
-	A >>= 7;
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	set_A(A);
 	return 0;
 }
@@ -820,8 +842,13 @@ int lsrz(byte_t opcode) {
 	addr_t operand = fetch_operand(opcode);
 	byte_t value = fetch_byte(operand);
 	byte_t first_bit = (value & 0x01);
+	value >>= 1;
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
 	(first_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
-	value >>= 7;
+	clear_STATUS(STATUS_N);
+
 	set_byte(operand, value);
 	return 0;
 }
@@ -832,7 +859,11 @@ int lsrzx(byte_t opcode) {
 	byte_t value = fetch_byte(new_addr);
 	byte_t first_bit = (value & 0x01);
 	(first_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
-	value >>= 7;
+	clear_STATUS(STATUS_N);
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	value >>= 1;
 	set_byte(new_addr, value);
 	return 0;
 }
@@ -860,18 +891,142 @@ int php(byte_t opcode) {}
 int pla(byte_t opcode) {}
 int plp(byte_t opcode) {}
 
-int rola(byte_t opcode) {}
-int rolz(byte_t opcode) {}
-int rolzx(byte_t opcode) {}
-int rol(byte_t opcode) {}
-int rolax(byte_t opcode) {}
-int rora(byte_t opcode) {}
-int rorz(byte_t opcode) {}
-int rorzx(byte_t opcode) {}
-int ror(byte_t opcode) {}
-int rorax(byte_t opcode) {}
+/* C is assumed to be either 0 or 1 */
+byte_t roll_left(byte_t value, byte_t *C) {
+	/* extract */
+	byte_t seventh_bit = (value >> 7);
+	/* rotate */
+	value <<= 1;
+	/* set LSB to *C */
+	value |= (*C);
+	*C = seventh_bit;
+	return value;
+}
+
+byte_t roll_right(byte_t value, byte_t *C) {
+	byte_t first_bit = (value & 0x01);
+	value >>= 1;
+	/* The 1 or 0 at the LSB of *C should be at MSB of *C
+	 * so it can be used to set the MSB of value */
+	*C <<= 7;
+	value |= *C;
+	*C = first_bit;
+	return value;
+}
+
+int rola(byte_t opcode) {
+	byte_t carry = fetch_STATUS(STATUS_C);
+	byte_t A = fetch_A();
+	A = roll_left(A, &carry);
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	(carry == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	set_A(A);
+	return 0;
+}
+
+int rolz(byte_t opcode) {
+	byte_t carry = fetch_STATUS(STATUS_C);
+	addr_t addr = fetch_operand(opcode);
+	byte_t value = fetch_byte(addr);
+	value = roll_left(value, &carry);
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	(carry == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	set_byte(addr, value);
+	return 0;
+
+}
+int rolzx(byte_t opcode) {
+	byte_t carry = fetch_STATUS(STATUS_C);
+	addr_t addr = fetch_operand(opcode);
+	addr += fetch_X();
+	byte_t value = fetch_byte(addr);
+	value = roll_left(value, &carry);
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	(carry == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	set_byte(addr, value);
+	return 0;
+}
+
+int rol(byte_t opcode) {
+	return rolz(opcode);
+}
+
+int rolax(byte_t opcode) {
+	return rolzx(opcode);
+}
+
+int rora(byte_t opcode) {
+	byte_t carry = fetch_STATUS(STATUS_C);
+	byte_t A = fetch_A();
+	A = roll_right(A, &carry);
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	(carry == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	set_A(A);
+	return 0;
+}
+int rorz(byte_t opcode) {
+	byte_t carry = fetch_STATUS(STATUS_C);
+	addr_t addr = fetch_operand(opcode);
+	byte_t value = fetch_byte(addr);
+	value = roll_right(value, &carry);
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	(carry == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	set_byte(addr, value);
+	return 0;
+}
+
+int rorzx(byte_t opcode) {
+	byte_t carry = fetch_STATUS(STATUS_C);
+	addr_t addr = fetch_operand(opcode);
+	addr += fetch_X();
+	byte_t value = fetch_byte(addr);
+	value = roll_right(value, &carry);
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	(carry == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
+	set_byte(addr, value);
+	return 0;
+}
+
+int ror(byte_t opcode) {
+	return rorz(opcode);
+}
+int rorax(byte_t opcode) {
+	return rorzx(opcode);
+}
+
 int rti(byte_t opcode) {}
 int rts(byte_t opcode) {}
+
 int sbci(byte_t opcode) {}
 int sbcz(byte_t opcode) {}
 int sbczx(byte_t opcode) {}
