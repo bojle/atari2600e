@@ -21,6 +21,9 @@ typedef uint16_t addr_t;
 #define CARMEM_START 0xf000
 #define CARMEM_END 0xffff
 
+#define RAM_START 0x0180
+#define RAM_END 0x01ff
+
 enum {
 	VSYNC  = 0x00,
 	VBLANK = 0x01, 
@@ -100,8 +103,8 @@ byte_t fetch_X();
 void set_Y(byte_t b);
 byte_t fetch_Y();
 
-void set_S(byte_t b);
-byte_t fetch_S();
+void set_S(addr_t b);
+addr_t fetch_S();
 
 void set_P(byte_t b);
 byte_t fetch_P();
@@ -109,6 +112,10 @@ byte_t fetch_P();
 void set_STATUS(enum status_t st);
 byte_t fetch_STATUS(enum status_t st);
 void clear_STATUS(enum status_t st);
+
+void stack_push(byte_t b);
+byte_t stack_pop();
+byte_t stack_top();
 
 void load_cartridge(char *filename);
 

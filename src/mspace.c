@@ -15,10 +15,10 @@ static byte_t mspace[0xffff];
 static byte_t A;			/* Accumulator */
 static byte_t X;			/* General Purpose Register X */	
 static byte_t Y;			/* General Purpose Register X */	
-static byte_t S;			/* Stack Pointer */
+static addr_t S = RAM_END;	/* Stack Pointer */
 static byte_t P = 32;		/* Program Status Word. 32 bcoz the 5th bit
 							   is supposed to be logical 1 at all times */
-static uint16_t PC;			/* Program Counter */
+static addr_t PC;			/* Program Counter */
 
 byte_t fetch_byte(addr_t addr) {
 	return mspace[addr];
@@ -58,10 +58,10 @@ byte_t fetch_Y() {
 	return Y;
 }
 
-void set_S(byte_t b) {
+void set_S(addr_t b) {
 	S = b;
 }
-byte_t fetch_S() {
+addr_t fetch_S() {
 	return S;
 }
 
@@ -83,6 +83,21 @@ void clear_STATUS(enum status_t st) {
 
 byte_t fetch_STATUS(enum status_t st) {
 	return ((P & st) == 0 ? 0 : 1);
+}
+
+// TODO: Check for stack overflow
+void stack_push(byte_t b) {
+	mspace[S] = b;
+	S--;
+}
+
+byte_t stack_pop() {
+	S++;
+	return mspace[S];
+}
+
+byte_t stack_top() {
+	return mspace[S+1];
 }
 
 void load_cartridge(char *filename) {

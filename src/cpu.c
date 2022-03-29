@@ -886,10 +886,26 @@ int oraay(byte_t opcode) {}
 int orainx(byte_t opcode) {}
 int orainy(byte_t opcode) {}
 
-int pha(byte_t opcode) {}
-int php(byte_t opcode) {}
-int pla(byte_t opcode) {}
-int plp(byte_t opcode) {}
+int pha(byte_t opcode) {
+	stack_push(fetch_A());
+	return 0;
+}
+int php(byte_t opcode) {
+	stack_push(fetch_P());
+	return 0;
+}
+
+int pla(byte_t opcode) {
+	byte_t A = stack_pop();
+	set_A(A);
+	return 0;
+}
+
+int plp(byte_t opcode) {
+	byte_t P = stack_pop();
+	set_P(P);
+	return 0;
+}
 
 /* C is assumed to be either 0 or 1 */
 byte_t roll_left(byte_t value, byte_t *C) {
@@ -1027,7 +1043,9 @@ int rorax(byte_t opcode) {
 int rti(byte_t opcode) {}
 int rts(byte_t opcode) {}
 
-int sbci(byte_t opcode) {}
+int sbci(byte_t opcode) {
+
+}
 int sbcz(byte_t opcode) {}
 int sbczx(byte_t opcode) {}
 int sbca(byte_t opcode) {}
@@ -1164,7 +1182,7 @@ int tya(byte_t opcode) {
 }
 
 int vac(byte_t opcode) {
-	log_fatal("Invalid/Vacant Instruction; Exiting");
+	log_fatal("Vacant/Illegal Instruction: %02x", opcode);
 	exit(EXIT_FAILURE);
 }
 
@@ -1479,8 +1497,6 @@ void disassembler_init() {
 		exit(EXIT_FAILURE);
 	}
 }
-
-
 
 void disassemble(byte_t opcode, state_t *s) {
 	addr_t pc = s->PC;
