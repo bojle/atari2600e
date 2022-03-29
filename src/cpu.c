@@ -287,7 +287,7 @@ int aslzx(byte_t opcode) {
 	byte_t seventh_bit = (value >> 7);
 	(seventh_bit == 0) ? clear_STATUS(STATUS_C) : set_STATUS(STATUS_C);
 	value <<= 7;
-	set_byte(addr, value);
+	set_byte(new_addr, value);
 	return 0;
 }
 
@@ -412,12 +412,66 @@ int cpx(byte_t opcode) {}
 int cpyi(byte_t opcode) {}
 int cpyz(byte_t opcode) {}
 int cpy(byte_t opcode) {}
-int decz(byte_t opcode) {}
-int deczx(byte_t opcode) {}
-int dec(byte_t opcode) {}
-int decax(byte_t opcode) {}
-int dex(byte_t opcode) {}
-int dey(byte_t opcode) {}
+
+int decz(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	value--;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_byte(operand, value);
+	return 0;
+}
+int deczx(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	operand += fetch_X();
+	byte_t value = fetch_byte(operand);
+	value--;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_byte(operand, value);
+	return 0;
+}
+int dec(byte_t opcode) {
+	return decz;
+}
+int decax(byte_t opcode) {
+	return deczx;
+}
+int dex(byte_t opcode) {
+	byte_t value = fetch_X();
+	value--;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_X(value);
+	return 0;
+
+}
+int dey(byte_t opcode) {
+	byte_t value = fetch_Y();
+	value--;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_Y(value);
+	return 0;
+}
+
 int eori(byte_t opcode) {}
 int eorz(byte_t opcode) {}
 int eorzx(byte_t opcode) {}
@@ -426,14 +480,71 @@ int eorax(byte_t opcode) {}
 int eoray(byte_t opcode) {}
 int eorinx(byte_t opcode) {}
 int eoriny(byte_t opcode) {}
-int incz(byte_t opcode) {}
-int inczx(byte_t opcode) {}
-int inc(byte_t opcode) {}
-int incax(byte_t opcode) {}
-int inx(byte_t opcode) {}
-int iny(byte_t opcode) {}
-int jmp(byte_t opcode) {}
-int jmpin(byte_t opcode) {}
+
+int incz(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	value++;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_byte(operand, value);
+	return 0;
+}
+int inczx(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	operand += fetch_X();
+	byte_t value = fetch_byte(operand);
+	value++;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_byte(operand, value);
+	return 0;
+}
+int inc(byte_t opcode) {
+	return incz(opcode);
+}
+int incax(byte_t opcode) {
+	return inczx(opcode);
+}
+
+int inx(byte_t opcode) {
+	byte_t value = fetch_X();
+	value++;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_X(value);
+	return 0;
+}
+
+int iny(byte_t opcode) {
+	byte_t value = fetch_X();
+	value++;
+	if ((value >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (value == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_Y(value);
+	return 0;
+}
+
+int jmp(byte_t opcode) {
+}
+int jmpin(byte_t opcode) {
+}
 int jsr(byte_t opcode) {}
 
 int ldai(byte_t opcode) {
@@ -696,10 +807,16 @@ int ldyax(byte_t opcode) {
 	return extra_cycles;
 }
 
-int lsra(byte_t opcode) {}
-int lsrz(byte_t opcode) {}
-int lsrzx(byte_t opcode) {}
-int lsr(byte_t opcode) {}
+int lsra(byte_t opcode) {
+
+}
+int lsrz(byte_t opcode) {
+
+}
+int lsrzx(byte_t opcode) {
+}
+int lsr(byte_t opcode) {
+}
 int lsrax(byte_t opcode) {}
 int nop(byte_t opcode) {}
 int orai(byte_t opcode) {}
