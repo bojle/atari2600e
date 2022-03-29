@@ -96,21 +96,7 @@ int adczx(byte_t opcode) {
 	return 0;
 }
 int adc(byte_t opcode) {
-	addr_t operand = fetch_operand(opcode);
-	byte_t value = fetch_byte(operand);
-	byte_t A = fetch_A();
-	if (A + value > 255) {
-		set_STATUS(STATUS_C);
-	}
-	A += value;
-	if ((A >> 7) == 1) { 	// 7th bit of A is set
-		set_STATUS(STATUS_N);
-	}
-	if (A == 0) {			// Result of last operation was zero
-		set_STATUS(STATUS_Z);
-	}
-	set_A(A);
-	return 0;
+	return adcz(opcode);
 }
 int adcax(byte_t opcode) {
 	byte_t extra_cycles = 0;
@@ -1044,13 +1030,107 @@ int rti(byte_t opcode) {}
 int rts(byte_t opcode) {}
 
 int sbci(byte_t opcode) {
-
+	byte_t operand = fetch_operand(opcode);
+	byte_t A = fetch_A();
+	// TODO: Check for Overflow (STATUS_V)
+	if (A + operand < 0) {
+		set_STATUS(STATUS_C);
+	}
+	A -= operand;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
 }
-int sbcz(byte_t opcode) {}
-int sbczx(byte_t opcode) {}
-int sbca(byte_t opcode) {}
-int sbcax(byte_t opcode) {}
-int sbcay(byte_t opcode) {}
+int sbcz(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
+	byte_t A = fetch_A();
+	if (A + value < 0) {
+		set_STATUS(STATUS_C);
+	}
+	A -= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int sbczx(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	operand += fetch_X();
+	byte_t value = fetch_byte(operand);
+	byte_t A = fetch_A();
+	if (A + value < 0) {
+		set_STATUS(STATUS_C);
+	}
+	A -= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+
+int sbca(byte_t opcode) {
+	return sbcz(opcode);
+}
+
+int sbcax(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t value = fetch_byte(new_addr);
+	byte_t A = fetch_A();
+	if (A + value < 0) {
+		set_STATUS(STATUS_C);
+	}
+	A -= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+int sbcay(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_Y();
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t value = fetch_byte(new_addr);
+	byte_t A = fetch_A();
+	if (A + value < 0) {
+		set_STATUS(STATUS_C);
+	}
+	A -= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
 int sbcinx(byte_t opcode) {}
 int sbciny(byte_t opcode) {}
 
