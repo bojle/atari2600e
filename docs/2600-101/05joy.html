@@ -1,0 +1,276 @@
+<body bgcolor="white">
+<b><font face="arial" size=5>2600 101</font></b>:
+<i><b><font face="arial" size=4>The Joy of Sticks</font></b></i>
+<br><br>
+
+So, moving forward...up until now, we've been making
+non-interactive demos.  A well-coded, graphically impressive
+demo can be a joy to behold, but our demos haven't been
+well-coded or graphically impressive. Interaction, obviously,
+is the hallmark of programming the atari.  The most common form
+of input is the beloved atari joystick. (The same 9-pin format
+was used for many other systems, such as the Commodore 64
+and the Colecovision.  (With some enhancements.)  In fact,
+you can use a Sega Genesis controller in an Atari, using
+the center button for firing.
+<br><br>
+It turns out that the Atari's controller sockets can be used
+for input or output. (This might bring to mind the idea of
+making tons of funky little homebrew electronic interfaces
+controlled by your Atari. Needless is to say this page of
+tutorial is not going to get in that deep.)  In fact, you can
+set pins individually for input or output.  <br><br>
+
+The Atari joystick has 4 switches; pressing N,S,E, or W
+activates one switch, pressing diagonally activates two switches.
+Before trying to read the direction of the controller, you need
+to have set the correct I/O Port for "input". (Port A is used for the controllers, Port
+B for the console switches). You can do this explicitly
+by writing 0's to all the bits of the memory location SWACNT...or,
+if you do the "generic start up stuff" routing I've been using, it's
+one of the memory locations that will be zero'd out in that loop.<br><br>
+
+Reading the direction, then, is pretty easy. The memory location
+SWCHA is set as follows:
+<table border=1>
+<tr><td>Data Bit</td><td>Direction</td><td>Player</td></tr>
+<tr><td>D7</td><td>right</td><td>P0</td></tr>
+<tr><td>D6</td><td>left</td><td>P0</td></tr>
+<tr><td>D5</td><td>down</td><td>P0</td></tr>
+<tr><td>D4</td><td>up</td><td>P0</td></tr>
+<tr><td>D3</td><td>right</td><td>P1</td></tr>
+<tr><td>D2</td><td>left</td><td>P1</td></tr>
+<tr><td>D1</td><td>down</td><td>P1</td></tr>
+<tr><td>D0</td><td>up</td><td>P1</td></tr>
+</table>
+A zero in a data bit means the joystick has been pressed that direction,
+and all ones means no joystick is being moved.  So if (in binary), you
+got 11101001, that would mean Player 0 (the left player) was pressing
+up, and Player 1 (the right player) was pressing down and left.  If you
+read 11001100 you would be confused...someone must be mucking with the
+hardware.
+
+<br><br>
+You may also be interested in whether the firebutton is pressed.
+Finding that out is easy, but with a few small potential gotchas.
+When the left joystick button is pressed,
+D7 (the leftmost bit, used for the sign of the number)
+of the memory location "INPT4" is set. (INPT5 for the other joystick.)
+ The other bits of the locations are
+set to random values (well not really, but they probably won't
+be all zeros so you can't use BEQ/BNE--I was burned by that once)
+So typical code might look like
+<pre>
+	LDA INPT4
+	BMI ButtonNotPressed
+
+	;do something here because the button *is* pressed
+
+ButtonNotPressed
+</pre>
+The other gotcha is that the behavior of this is modified
+by what you set D6 of our old friend VBLANK to...the safest
+behavior is to make sure D6 of VBLANK is 0...this is easily done
+if you just set VBLANK to #2 <nobr>(%#00000010)</nobr> when you start the vertical
+blank, since after that is when you'll likely be doing the button checking.
+(Thanks to Eckhard Stolberg and some other Stella-ites
+for some advice on the buttons.)
+<br><br>
+
+So, for today's program, we'll move yesterday's dot around.
+Just for kicks, we'll change the screen color when the button
+is pressed. (The color value will be the vertical position of the,
+so keep the button held while moving around.)
+<br><br>
+Again, new stuff is in red, and you might notice
+the only changes take place during the vertical blank...the kernal
+is the same as the last lesson's.
+
+<hr><pre>
+; move a dot with the joystick by Kirk Israel
+
+	processor 6502
+	include vcs.h
+	include macro.h
+	org $F000
+
+YPosFromBot = $80;
+VisibleMissileLine = $81;
+
+;generic start up stuff...
+Start
+	CLEAN_START
+
+
+	lda #$00
+	sta COLUBK	;start with black background
+	lda #66
+	sta COLUP0
+;Setting some variables...
+	lda #80
+	sta YPosFromBot	;Initial Y Position
+
+	lda #$20
+	sta NUSIZ0	;Quad Width
+
+
+;VSYNC time
+MainLoop
+	lda #2
+	sta VSYNC
+	sta WSYNC
+	sta WSYNC
+	sta WSYNC
+	lda #43
+	sta TIM64T
+	lda #0
+	sta VSYNC
+
+<font color="red">
+;Main Computations; check down, up, left, right
+;general idea is to do a BIT compare to see if
+;a certain direction is pressed, and skip the value
+;change if we're not moving that way
+
+;
+;Not the most efficient code, but gets the job done,
+;including diagonal movement
+;
+
+; for up and down, we INC or DEC
+; the Y Position
+
+	lda #%00010000	;Down?
+	bit SWCHA
+	bne SkipMoveDown
+	inc YPosFromBot
+SkipMoveDown
+
+	lda #%00100000	;Up?
+	bit SWCHA
+	bne SkipMoveUp
+	dec YPosFromBot
+SkipMoveUp
+
+; for left and right, we're gonna
+; set the horizontal speed, and then do
+; a single HMOVE.  We'll use X to hold the
+; horizontal speed, then store it in the
+; appropriate register
+
+
+;assum horiz speed will be zero
+	ldx #0
+
+	lda #%01000000	;Left?
+	bit SWCHA
+	bne SkipMoveLeft
+	ldx #$10	;a 1 in the left nibble means go left
+SkipMoveLeft
+
+	lda #%10000000	;Right?
+	bit SWCHA
+	bne SkipMoveRight
+	ldx #$F0	;a -1 in the left nibble means go right...
+SkipMoveRight
+			;(in 4 bits, using "two's complement
+			; notation", binary 1111 = decimal -1
+			; (which we write there as hex "F" --
+			; remember?))
+
+
+	stx HMM0	;set the move for missile 0
+
+
+; while we're at it, change the color of the background
+; if the button is pressed (making sure D6 of VBLANK has
+; appropriately set above) We'll set the background color
+; to the vertical position, since that will be changing
+; a lot but we can still control it.
+
+	lda INPT4		;read button input
+	bmi ButtonNotPressed	;skip if button not pressed
+	lda YPosFromBot		;must be pressed, get YPos
+	sta COLUBK		;load into bgcolor
+ButtonNotPressed
+</font>
+
+
+WaitForVblankEnd
+	lda INTIM
+	bne WaitForVblankEnd
+	ldy #191
+	sta WSYNC
+	sta VBLANK
+
+	sta WSYNC
+	sta HMOVE
+
+;main scanline loop...
+;
+;(this probably ends the "new code" section of today's
+; lesson...)
+
+
+ScanLoop
+	sta WSYNC
+
+; here the idea is that VisibleMissileLine
+; is zero if the line isn't being drawn now,
+; otherwise it's however many lines we have to go
+
+CheckActivateMissile
+	cpy YPosFromBot
+	bne SkipActivateMissile
+	lda #8
+	sta VisibleMissileLine
+SkipActivateMissile
+
+;turn missile off then see if it's turned on
+	lda #0
+	sta ENAM0
+;
+;if the VisibleMissileLine is non zero,
+;we're drawing it
+;
+	lda VisibleMissileLine
+	beq FinishMissile
+IsMissileOn
+	lda #2
+	sta ENAM0
+	dec VisibleMissileLine
+FinishMissile
+
+
+	dey
+	bne ScanLoop
+
+	lda #2
+	sta WSYNC
+	sta VBLANK
+	ldx #30
+OverScanWait
+	sta WSYNC
+	dex
+	bne OverScanWait
+	jmp  MainLoop
+
+	org $FFFC
+	.word Start
+	.word Start
+</pre>
+<hr>
+
+Next: <a href="06happy.html">Happy Face</a>
+
+
+<table border=1><tr><td>
+<a href="index.html">Introduction</a> -
+<a href="01env.html">The Development Environment</a> -
+<a href="02breach.html">Into The Breach</a> -
+<a href="03first.html">My First Program</a> - <br>
+<a href="04clink.html">Kernal Clink</a> -
+<a href="05joy.html">The Joy of Sticks</a> -
+<a href="06happy.html">Happy Face</a> -
+<a href="07buffer.html">PlayerBufferStuffer</a>
+</td><tr></table>

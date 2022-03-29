@@ -1,0 +1,249 @@
+<body bgcolor="white">
+<b><font face="arial" size=5>2600 101</font></b>:
+<i><b><font face="arial" size=4>PlayerBufferStuffer</font></b></i>
+<br><br>
+
+Congratulations! You've reached the last lesson of 2600 101, and
+it's a pretty easy one.
+<br><br>
+Last lesson I said I'd tell you what's wrong with the kernal I presented.
+If you run that, you might notice that when the happy face is on the left
+side of the screen, the top line of its head gets chopped off! Why is that?
+Well, it turns out that even our humble little computations were taking more
+time than we had...in particular, the CheckActivatePlayer section, where
+we initialize the variable VisiblePlayerLine with 8, pushes us into
+visible scanline time, and GRP0 doesn't get set in time
+<br><br>
+So what to do?  This is where the fine art of Atari Kernal Tweaking
+comes into play. I'm not very good at it, but I'm pretty pleased with the
+idea I came up...I call it the PlayerBufferStuffer<sup>tm</sup>, patent
+not pending.  If we use a variable to store the player buffer, we can
+take the entire visible scanline time to do the computations we need for the <i>next</i>
+line, and then stuff that into the buffer. Then all we have to during the
+horizontal blank is grab that buffer variable from the last line and stuff
+it into GRP0.  <br><br>
+
+The technique works pretty well, and can even be expanded for another player or
+the missiles. It has some disadvantages, like I can't think of it working for
+multicolored player graphics, but it has one important advantage: even a dumb guy
+like me can understand it. There are some other tricks that you can use
+that are game specific as well; for example, if you know one of the players
+is only going to be on the right side of the screen, you could take your
+time setting the Register for it, since it would be ok if it bled into the visible scan line.
+<br><br>
+It turned out to be really easy to make the change from the last example, as you can
+see by the lack of red below.
+
+<hr>
+<pre>
+; move a happy face with PlayerBufferStuffer
+	processor 6502
+	include vcs.h
+	include macro.h
+	org $F000
+
+YPosFromBot = $80;
+VisiblePlayerLine = $81;
+<font color="red">PlayerBuffer = $82 ;setup an extra variable</font>
+
+;generic start up stuff...
+Start
+	CLEAN_START
+
+	lda #$00   ;start with a black background
+	sta COLUBK
+	lda #$1C   ;lets go for bright yellow, the traditional color for happyfaces
+	sta COLUP0
+;Setting some variables...
+	lda #80
+	sta YPosFromBot	;Initial Y Position
+
+;; Let's set up the sweeping line. as Missile 1
+	lda #2
+	sta ENAM1  ;enable it
+	lda #33
+	sta COLUP1 ;color it
+
+	lda #$20
+	sta NUSIZ1	;make it quadwidth (not so thin, that)
+
+
+	lda #$F0	; -1 in the left nibble
+	sta HMM1	; of HMM1 sets it to moving
+
+;VSYNC time
+MainLoop
+	lda #2
+	sta VSYNC
+	sta WSYNC
+	sta WSYNC
+	sta WSYNC
+	lda #43
+	sta TIM64T
+	lda #0
+	sta VSYNC
+
+
+; for up and down, we INC or DEC
+; the Y Position
+
+	lda #%00010000	;Down?
+	bit SWCHA
+	bne SkipMoveDown
+	inc YPosFromBot
+SkipMoveDown
+
+	lda #%00100000	;Up?
+	bit SWCHA
+	bne SkipMoveUp
+	dec YPosFromBot
+SkipMoveUp
+
+; for left and right, we're gonna
+; set the horizontal speed, and then do
+; a single HMOVE.  We'll use X to hold the
+; horizontal speed, then store it in the
+; appropriate register
+
+;assum horiz speed will be zero
+	ldx #0
+
+	lda #%01000000	;Left?
+	bit SWCHA
+	bne SkipMoveLeft
+	ldx #$10	;a 1 in the left nibble means go left
+	lda #%00001000   ;a 1 in D3 of REFP0 says make it mirror
+	sta REFP0
+SkipMoveLeft
+
+	lda #%10000000	;Right?
+	bit SWCHA
+	bne SkipMoveRight
+	ldx #$F0	;a -1 in the left nibble means go right...
+	lda #%00000000
+	sta REFP0    ;unmirror it
+
+SkipMoveRight
+
+
+	stx HMP0	;set the move for player 0, not the missile like last time...
+
+; see if player and missile collide, and change the background color if so
+
+	lda #%10000000
+	bit CXM1P
+	beq NoCollision	;skip if not hitting...
+	lda YPosFromBot	;must be a hit! load in the YPos...
+	sta COLUBK	;and store as the bgcolor
+NoCollision
+	sta CXCLR	;reset the collision detection for next time
+
+<font color="red">	lda #0		 ;zero out the buffer</font>
+<font color="red">	sta PlayerBuffer ;just in case</font>
+
+
+WaitForVblankEnd
+	lda INTIM
+	bne WaitForVblankEnd
+	ldy #191
+
+
+	sta WSYNC
+	sta HMOVE
+
+	sta VBLANK
+
+
+;main scanline loop...
+
+
+ScanLoop
+	sta WSYNC
+
+<font color="red">	lda PlayerBuffer ;buffer was set during last scanline</font>
+<font color="red">	sta GRP0         ;put it as graphics now</font>
+
+
+CheckActivatePlayer
+	cpy YPosFromBot
+	bne SkipActivatePlayer
+	lda #8
+	sta VisiblePlayerLine
+SkipActivatePlayer
+
+
+
+
+
+;set player bufferto all zeros for this line, and then see if
+;we need to load it with graphic data
+	lda #0
+<font color="red">	sta PlayerBuffer   ;set buffer, not GRP0</font>
+;
+;if the VisiblePlayerLine is non zero,
+;we're drawing it next line
+;
+	ldx VisiblePlayerLine	;check the visible player line...
+	beq FinishPlayer	;skip the drawing if its zero...
+IsPlayerOn
+	lda BigHeadGraphic-1,X	;otherwise, load the correct line from BigHeadGraphic
+				;section below... it's off by 1 though, since at zero
+				;we stop drawing
+<font color="red">	sta PlayerBuffer	;put that line as player graphic for the next line</font>
+	dec VisiblePlayerLine 	;and decrement the line count
+FinishPlayer
+
+	dey
+	bne ScanLoop
+
+	lda #2
+	sta WSYNC
+	sta VBLANK
+	ldx #30
+OverScanWait
+	sta WSYNC
+	dex
+	bne OverScanWait
+	jmp  MainLoop
+
+BigHeadGraphic
+	.byte #%00111100
+	.byte #%01111110
+	.byte #%11000001
+	.byte #%10111111
+	.byte #%11111111
+	.byte #%11101011
+	.byte #%01111110
+	.byte #%00111100
+
+	org $FFFC
+	.word Start
+	.word Start
+</pre>
+<hr>
+Incidentally, while I thought PlayerBufferStuffer was kind of clever,
+there is a well known better way of doing this called skipdraw.
+Ask about it on [stella], or look for it at <a href="http://www.homebrewgames.net/thedig/">the Dig</a> (Oops - The Dig has gone away - here's Paul Slocum's <a href="http://www.qotile.net/minidig/tricks.html">Best of the Dig page</a>) 
+I started to assemble a <a href="http://alienbill.com/2600/cookbook/">2600 Cookbook page</a> with lots of the collected wisdom
+of the [stella] list, though it never quite got to skipdraw...
+<br><br>
+
+
+You now know just about as much as I do about Atari programming, and I hope
+this tutorial has given you an easier time of it than I had. Check out the
+resources I list in the Introduction to continue your 2600 programming career...
+a whole world of kernal tweaking, graphical tricks, and gameplay ideas awaits you.
+<br><br>
+
+<table border=1><tr><td>
+<a href="index.html">Introduction</a> -
+<a href="01env.html">The Development Environment</a> -
+<a href="02breach.html">Into The Breach</a> -
+<a href="03first.html">My First Program</a> - <br>
+<a href="04clink.html">Kernal Clink</a> -
+<a href="05joy.html">The Joy of Sticks</a> -
+<a href="06happy.html">Happy Face</a> -
+<a href="07buffer.html">PlayerBufferStuffer</a>
+</td><tr></table>
+
+

@@ -1,0 +1,137 @@
+<!--
+thanks to:
+Nick Bensema
+Andrew Davie
+
+-->
+
+<body bgcolor="white">
+<b><font face="arial" size=5>2600 101</font></b>:
+<i><b><font face="arial" size=4>The Development Environment</font></b></i>
+<br><br>
+
+
+There's nothing like getting your feet wet with compiling and playing some real Atari
+programs to work up your appetite for making your own works.  This page will tell you how
+to do that on a PC running Windows.  (There's nothing
+to stop you from <a href="http://www.angelfire.com/mac/mactari/mactari/mact.html">doing this on a
+Mac</a>, but that's beyond the scope of this tutorial.)
+<br><br>
+
+<b><font face="arial" size=5>Step One: The Emulation</font></b><br>
+One cool thing about making Atari games is that you get to <i>play</i> Atari games.
+(Call it "research".)
+A number of great emulators are available free for Windows that you play
+nearly any Atari game ever made.  Here are the
+three I've played with:
+<ul>
+
+<li><a href="http://www.emuunlim.com/stellax/">StellaX</A>. I found this one to be the easiest
+to use with a good Windows frontend, and with very good emulation.
+
+<li><a href="http://www.whimsey.com/z26/z26.html">Z26</a>. Some people consider this to be the
+canonical emulator...as Manuel Polik <a href="http://www.biglist.com/lists/stella/archives/200206/msg00120.html">puts
+it</a>, "Something running on the real thing
+and not with Z26 must be due to a bug on the real thing! :-)"  It generally is run from the commandline.
+or you can try a front end like <a href="http://www.wintersolace.com/index2.html">x26</a>.
+
+
+
+<li><a href="bin/pcaewin.zip">PCAE</a> is another emulator. Seems to have some nice debugging features,
+but it has a rather unfriendly, engineer-ish interface. On the other hand, it includes
+a debugger which can be very useful, though very difficult to use. That link is a local mirror,
+it's <a href="http://pcae.vg-network.com/">webpage has gone missing</a>.
+
+</ul>
+
+(You  might want to stop and think about a logical
+layout for your stuff.  I have a single "atari" directory, with different subdirectories for
+tools, emulators, bins, and misc. docs I've collected. Also, I made sure to name all directories
+with names less than 8 letters, with no spaces...this makes things a little simpler with Z26
+and DASM (below), which have an old fashioned view of file systems...
+Life might be easier if you do something similar, but hey, it's your harddrive.)<br><br>
+
+Once you've downloaded your emulator, you should test to see that it works on your system.
+This can be a very pleasant task for obvious reasons
+(assuming there aren't any glitches, and there weren't for me), and also will familarize
+you with the keyboard/joystick setups. StellaX makes this very easy for you, with the ROMs
+(files that end in .BIN) preinstalled when you unpack the program. For the most part these
+are homebrew carts.  (You can also point StellaX to a different directory from the Options menu, if
+you want to organize your life differently.)<br><br>
+There are also old Atari ROMs floating around.
+<A href="http://atariage.com">AtariAge</a> has many of these.
+
+
+
+<br><br>
+<b><font face="arial" size=5>Step Two: The Compilation</font></b><br>
+An assembler is a program that takes
+the Assembly source code and makes it into a binary image that an emulator
+can run.
+<a href="http://www.taswegian.com/TwoHeaded/Atari2600/dasm/">DASM</a>
+ is the assembler of choice.
+ <i>(<a href="bin/dasm22007.zip">local mirror of V2.20.07</a>)</i>.
+ The file you want is dasm.exe in the DASM\bin\DOS inside the zip.
+<br><br>
+
+You are now ready to compile and run your first Atari program.
+We'll use Chris "Crackers" Cracknell's 2600 Digital Clock <i>(from hell!!!, I'm sure
+he'd be <a href="http://groups.google.com/groups?selm=touw6.474302%24f36.14937868%40news20.bellglobal.com&oe=UTF-8&output=gplain">quick to add</A>.)</i>
+Here is the <a href="bin/clock003.asm">source code for it</a>. Either right click
+and save it as "clock003.asm" or cut and paste the code into notepad and save.
+(<i>Don't</i> use an editor like Word that will much up the textfile with all sorts
+of formatting crap.)  Incidentally, the ".asm" isn't crucial,
+just a convention people follow.
+<br><br>
+Now we're really ready!  I'm going to assume you saved it in the same
+directory as DASM, otherwise make the appropriate path changes when you enter
+the following line:
+<pre>	dasm clock003.asm -f3 -oclock.bin</pre>
+<i>The -f3 is crucial</i>--I learned that the hard way, and had to get help
+from the Stella list. (It has to do with the format of the resulting binary file.)
+The other parts of this line should be obvious: assemble the file
+"clock003.asm", put the resulting file in "clock.bin".<br><br>
+
+If neccesary, move the .bin to the appropriate directory and run it from your emulator.
+You should see a big friendly 12:00 staring you in the face. And if you wait around, 12:01.
+(You can set the time using the joystick.)
+<br><br>
+Great! You've now assembled and ran your first Atari program.  You're now mostly ready to
+assemble any source code that people post to the Stella list...<i>but there's one big catch, and its name is "vcs.h".</i>
+VCS.H is a file that sets up many constants that the Atari relies on, letting programmers
+use codes like "WSYNC" rather than ugly hex numbers like "$02".  (One of the reasons
+I picked the clock example was because it made these definitions within the file itself instead
+of depending on an external VCS.H)  This file should sit in the same directory
+as DASM.  Historically there were a few versions of this
+file floating around, but the current standard can be downloaded from
+<a href="http://atari2600.org/dasm">DASM's official homepage</a>,
+the "Atari 2600 Support Files" Zip file.
+Here's <a href="bin/vcs.h">a local copy of VCS.H</a>.
+
+
+
+
+<br><br>
+<b><font face="arial" size=5>Step Three</font></b><br>
+Now might be a good time to check out
+Adam Trionfo's
+<a href="http://www.gooddealgames.com/articles/changing_atari_vcs_graphics_the_easy_way.pdf">Changing Atari VCS Graphics- The Easy Way</a>
+<i>(<a href="docs/easyway.pdf">local mirror</a>, or
+Google can  <a href="http://www.google.com/search?hl=en&lr=lang_en&ie=ISO-8859-1&safe=off&q=%22Changing+Atari+VCS+Graphics-+The+Easy+Way%22&btnG=Google+Search">get you an HTML version</a>.)</i>
+It's a painless way of learning how to hack the graphics in games like Space Invaders, and you'll be
+introduced to a few extra tools as well.
+
+
+<br><br>
+Next: <a href="02breach.html">Into The Breach</a>
+
+<table border=1><tr><td>
+<a href="index.html">Introduction</a> -
+<a href="01env.html">The Development Environment</a> -
+<a href="02breach.html">Into The Breach</a> -
+<a href="03first.html">My First Program</a> - <br>
+<a href="04clink.html">Kernal Clink</a> -
+<a href="05joy.html">The Joy of Sticks</a> -
+<a href="06happy.html">Happy Face</a> -
+<a href="07buffer.html">PlayerBufferStuffer</a>
+</td><tr></table>

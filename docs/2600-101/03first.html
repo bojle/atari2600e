@@ -1,0 +1,617 @@
+<body bgcolor="white">
+<b><font face="arial" size=5>2600 101</font></b>:
+<i><b><font face="arial" size=4>My First Program</font></b></i>
+<br><br>
+
+Shortly we'll be ready to begin programming. Or rather I'll be ready
+to begin programming,
+and you should be at a stage where you're ready to follow along.<br><br>
+
+But, first, a few words about 6502 (actually 6507, but who's counting) assembly.
+I really urge you to take a look at "Assembly in One Step", but if you're not
+going to do that (or you already have and could use a review) here's
+what you need to know before looking at programs: There are three all important
+memory things (aka "registers") on this chip: the Accumulator
+(usually called A) that can hold 8 bits of information, and is involved
+in all the math the chip does, and X and Y each of which can also hold
+1 byte of information. Some of the chip instructions can also
+access the pitiful 128 bytes of memory you get directly, but this is a
+bit slower. Also, you can't directly copy the value at a memory location ("address")
+to another memory location...instead, you need to first put it into one
+of the registers (putting a value into a register from memory is called
+"Loading") and then take it out of the register and put it into memory
+(called "Storing").  6502 Assembly is then a bunch of these little commands
+that do tidbits like basic math functions, memory juggling, and program
+flow control. (At any given moment, the "instruction pointer" is pointing
+at an address in memory, where the next command to execute is located.
+It generally goes forward through memory, unless it reaches a
+branch (a small hop, usually based on checking if a condition is true)
+or a jump (a potentially bigger jump). You can also "Jump to Subroutine",
+and then "Return" (which uses this little thing called a stack) but
+many atari games will avoid doing that, at least in "time critical"
+parts, since it's slower than
+just putting the instructions right there, and it uses 2 bytes of
+memory for each level of jump you do. (Actually, subroutines
+can greatly add to the structure and readability of a program, but I'm
+not too good with them, so the examples here won't use them.)
+<br><br>
+
+Oh, by the way, you need to kind of know "hex notation", which
+is base 16 with the digits 0 through F (as opposed to base 10,
+which goes from 0 through 9. Base 16 is just like Base 10 if you
+have 6 extra fingers.)
+And to make matters worse, we usually record negative numbers
+in something called "two's complement notation"...you have
+to understand this.
+That's all I'm going to say about hex here,
+'cause I'm lazy.
+<br><br>
+Andrew Davie points out that another
+potentially confusing thing you need to learn about are the
+"addressing modes".  Most of the instructions do stuff with
+memory locations, and most of those memory locations can be
+expressed in different ways. (Not all instructions support
+all of the following modes)<br>
+
+
+<table border=1>
+<tr>
+<th>mode name</th>
+<th>example</th>
+<th>what it does</th>
+</tr>
+
+<tr>
+<td>Absolute addressing</td>
+<td>lda $2000</td>
+<td>load a byte from location hexadecimal 2000 (8192 decimal)</td>
+</tr>
+<tr>
+<td>Zero-page addressing</td>
+<td>lda $80</td>
+<td>load a byte from location $80 (128 decimal).  This is the first byte of RAM</td>
+</tr>
+<tr>
+<td>Absolute indexed addressing</td>
+<td>lda $2000,x        </td>
+<td>load a byte from location hexadecimal 2000 + x, where x is the 8-bit value in the X register</td>
+
+</tr>
+<tr>
+<td>Indirect indexed, y</td>
+<td>lda (0),y</td>
+<td>load a byte from location formed by the two bytes
+   at 0,1 (in low, high format) added to the 8-bit value in the Y register</td>
+</tr>
+</table>
+There are even more modes than that, but this gives you the general idea.
+<br><br>
+Andrew Davie also wrote
+ the following:
+<i>
+Registers are 8-bit only.  Loading and storing from anywhere is also 8-bit
+only.  Addresses are 8 or 16 bits.  8-bit addresses are also known as 'zero
+page' because the high-byte of the (imaginary) 16-bit address for these is
+always 0.  Accesssing 16-bit locations in other areas of memory (ie: not
+zero page) is done through pairs of bytes in low, high format.  Indexing is
+the process of adding the contents of an index register (x or y) to an
+8-or-16 bit address, and grabbing a byte from that location - which may also
+turn out to be either 8 or 16 bits.  :)
+</i>
+
+
+<br><br>
+In case you haven't guessed, the previous paragraphs were a brutally
+short summary of the 6502 and Assembly language in general.
+Now here's a  similar hatchet job on the 2600 and its TIA (television
+interface adaptor) chip, a summary of the Stella Player's Guide
+you should have at least skimmed:
+<br><br>
+The 2600 has, graphically speaking, 5 "things" to play with:
+2 "players", which can be semi-detailed graphical things like
+men or dragons or tanks or what not, 2 "missiles", each being
+a square associated with a player, and a "ball", which is a bit
+like a missile, but associated with the playfield. (Playfield?? You ask.
+I'm getting to that.) And there's the playfield, 20 pixels across
+(and as many as you want down) that can be the background or
+foreground of your game.
+<br><br>
+Also, of course, the Atari has ways of dealing with joysticks
+and sounds and what not, but we're not going to tackle all that
+yet. And there is even a (very small) set of things the TIA does
+that makes your life easier, like keeping track of what things
+are overlapping other things, so you know if the bullet has
+hit a man or if the man has bumped into a wall.
+
+<br><br>
+
+So, remember all that talk about scanlines on
+<a href="02breach.html">Into The Breach</a>? Here's where it really
+comes into play.  Before each scanline is drawn, you have to determine
+if a missile or ball is "on" for this line, and turn it on if so. You
+also have to determine if the "player" is on this line, and if so,
+what line of graphics should be drawn on this line to represent the player.
+All that's reasonably tough to do quickly...so quickly, we're not going
+to worry about it for our first test program. (And you may notice that most
+Atari games seem to have more characters than 2 players, 2 bullets, and
+an extra thingy...what's happening there is that these graphic "things" are
+being reused as the program loops through and draws the screen.)
+<br><br>
+Our first test program is called "Thin Red Line".
+It got its very start in
+Nick Bensema's <a href="docs/howtodraw.asm">How to Draw a Playfield</a>, though his routine
+used that JSR (jump to subroutine)/RTS (return from subroutine)
+stuff, and I've made some other changes as well with an eye
+towards making as simple a program as possible.
+(You can follow that link to the original code Nick wrote if you're
+curious...it is a nice visual display.)
+I made at
+least three major mistakes when I first wrote Thin Red Line, 2 of which
+Thomas Jentzsch helped me correct. (The other one I got on my own).
+<br><br>
+
+<table align="right" width="50%" border=0 bgcolor="#CCCCCC">
+<tr>
+<th>Sidebar: Two's Complement Notation</th>
+</tr>
+<tr>
+<td>
+
+Ok, let me try to explain this.  In Two's Complement, the leftmost bit
+is 1 when the number is negative, otherwise 0. To get the negative of
+<i>any</i> number, flip all the bits (1 to 0, 0 to 1) and then add 1,
+ignoring the sign.  So with 4 bits, 2 is "0010"; flip that and it's "1101",
+add 1 you get "1110".  Note that if you flip bits and add one again, you
+get back to the original "0010"<br><br>
+It seemed odd to me that the "biggest" value you could get in 4 bytes
+("1111") would be 15, but it's -1, but think of a new car's speedometer going
+backwards. If would go from 0000 to 9999--seems like the biggest number,
+but <i>really</i> it's "-1".  Well, if that (really weird) car's speedometer was
+in binary, it would roll back to "1111" instead. And the decimal car would then
+go to 9998, and our binary car goes back to 1110.  It's a little weird but it works.
+
+</td></tr></table>
+
+
+My idea was to make a line by turning on one of the missile
+graphics, and never turning it off. (Thus saving me from having
+to figure out when to turn it on and off to get the height of
+it correct).  I also decided to get the line moving...the Atari
+makes it very easy to move any of its "things" horizontally.
+Each "thing" has a memory location you can set from 7 to -8
+
+
+
+
+
+
+
+(positive moves to the left, negative to the right...which might
+be the opposite of what you expect! ) that represents that
+thing's Horizontal Speed.  Then you execute a special command called
+HMOVE, which moves all 5 of the things at whatever its horizontal speed is
+at.  Anything that has a 0
+in its horizontal speed register stays still of course.  And there
+are some other gotchas there, which I'll try to explain in the code.
+(Actually, all 3 of my initial mistakes involved that HMOVE,
+so while the idea is simple, the implementation gets complex.)
+
+
+<br><br>
+I'm going to give you the short, uncommented version first,
+so when you see the commented version that follows you don't get
+too scared by its immensity:
+<hr>
+<pre>
+; thin red line by Kirk Israel
+
+	processor 6502
+	include vcs.h
+	org $F000
+Start
+	sei
+	cld
+	ldx #$FF
+	txs
+	lda #0
+ClearMem
+	sta 0,X
+	dex
+	bne ClearMem
+	lda #$00
+	sta COLUBK
+	lda #33
+	sta COLUP0
+MainLoop
+	lda  #2
+	sta  VSYNC
+	sta  WSYNC
+	sta  WSYNC
+	sta  WSYNC
+	lda  #43
+	sta  TIM64T
+	lda #0
+	sta  VSYNC
+
+WaitForVblankEnd
+	lda INTIM
+	bne WaitForVblankEnd
+	ldy #191
+
+	sta WSYNC
+	sta VBLANK
+	lda #$F0
+	sta HMM0
+
+	sta WSYNC
+	sta HMOVE
+ScanLoop
+	sta WSYNC
+	lda #2
+	sta ENAM0
+	dey
+	bne ScanLoop
+
+	lda #2
+	sta WSYNC
+	sta VBLANK
+	ldx #30
+OverScanWait
+	sta WSYNC
+	dex
+	bne OverScanWait
+	jmp  MainLoop
+
+	org $FFFC
+	.word Start
+	.word Start
+</pre>
+<hr>
+See, was that so bad? Of course you probably can't follow a word of it, so here
+is the fully explained version. You really should read through it, reading
+other people's code is a difficult but crucial learning technique, and this
+is about as heavily commented as you'll ever get.
+<hr>
+
+<pre>
+; thin red line by Kirk Israel
+;
+;	(anything after a ; is treated as a comment and
+;	ignored by DASM)
+;
+;	 First we have to tell DASM that we're
+;	 coding to the 6502:
+;
+
+	processor 6502
+
+;
+;	then we have to include the "vcs.h" file
+;	that includes all the "convenience names"
+;	for all the special atari memory locations...
+;
+	include vcs.h
+
+;
+;	now tell DASM where in the memory to place
+;	all the code that follows...$F000 is the preferred
+; 	spot where it goes to make an atari program
+;	(so "org" isn't a 6502 or atari specific command...
+;	it's an "assembler directive" that's
+;	giving directions to the program that's going to
+;	turn our code into binary bits)
+;
+
+	org $F000
+
+;
+;	Notice everything we've done so far is "indented"
+;	Anything that's not indented, DASM treats as a "label"
+;	Labels make our lives easier...they say "wherever the
+;	next bit of code ends up sitting in physical memory,
+;	remember that location as 'labelname'.  That way we
+;	can give commands lke "JMP labelname" rather than
+;	"JMP $F012" or what not.
+;	So we'll call the start of our program "Start".
+;	Inspired genius, that.  Clever students will have
+;	figured out that since we just told DASM "put the
+;	next command at $F000", and then "Call the next memory
+;	location 'Start':, we've implicitly said that
+;	"Start is $F000"
+;
+
+Start
+
+;
+;	The next bit of code is pretty standard. When the Atari
+;	starts up, all its memory is random scrambled. So the first
+;	thing we run is "SEI" "CLD" and "TXS".
+;	Look these up if you want,
+;	for now know that they're just good things to cleanse
+;	the palette...
+
+	sei	 ;Disable Any Interrupts (hey! comments can go on the side!)
+	cld  	 ; Clear BCD math bit.
+	ldx #$FF ; set X to the top of the memory we have,
+	txs	 ; ...and set the stack pointer to what X is...i.e. #$FF aka 255
+
+;
+;	Now the following is another pretty standard bit of code to start
+;	your program with..it makes a brief delay when your
+;	atari program starts, and if you're a hot shot you could consider
+;	zeroing out only the memory locations you care about, but
+;	for now we're gonna start at the top of memory, walk our way
+;	down, and put zeros in all of that.
+;
+;	One thing you may notice is that a lot of atari programming
+;	involves starting at a number, and counting your way down
+;	to zero, rather than starting at zero and counting your
+;	way up. That's because when you're using a Register to
+;	hold your counter, it's faster/easier to compare that
+;	value to zero than to compare it to the target value
+;	you want to stop at.
+;
+;	So X is going to hold the starting memory location
+;	(top of memory, $#FF)...in fact, it's already set to
+;	$FF from the previous instruction, so we're not going to
+;	bother to set it again...you see that kind of shortcut all
+;	the time in people's code, and sometimes it can be confusing,
+;	but Atari programs have to be *tight*. The "A"ccumulator is
+;	going to hold what we put into each memory location (i.e. zero)
+
+	lda #0		;Put Zero into A (X is at $FF)
+ClearMem
+	sta 0,X		;Now, this may not mean what you think...
+	dex		;decrement X (decrease X by one)
+	bne ClearMem	;if the last command resulted in something
+			;that's "N"ot "Equal" to Zero, branch back
+			;to "ClearMem"
+;
+;	Ok...a word of explanation about "sta 0,X"
+;	You might assume that that said "store zero into the memory
+;	location pointed to by X..." but rather, it's saying
+;	"store whatever's in the accumulator at the location pointed
+;	to by (X plus zero)"
+;
+;	So why does the command do that?  Why isn't there just a
+;	"STA X" command? (Go ahead and make the change if you want,
+;	DASM will give you an unhelpful error message when you go
+;	to assemble.) Here's one explanation, and it has to do with
+;	some handwaving I've been doing...memory goes from $0000-$FFFF
+;	but those first two hex digits represent the "page" you're dealing
+;	with.  $0000-$00FF is the "zero page", $0100-$01FF is the first
+;	page, etc.  A lot of the 6502 commands take up less memory
+;	when you use the special mode that deals with the zero page,
+;	where a lot of the action in atari land takes place.
+;  (some of those values are the special 'named ones' vcs.h names
+;  for us, that make the Atari's TIA chip do special stuff.
+;  Most of the rest you can use for your variables.)
+;	...sooooo, STA $#nnnn would tell it to grab the next two bytes
+;	for a full 4 byte address, but this mode only grabs the one
+;	value from the zero page
+;
+
+;
+;	Now we can finally get into some more interesting
+;	stuff.  First lets make the background black
+;	(Technically we don't have to do this, since $00=black,
+;	and we've already set all that memory to zero.
+;	But one easy experiment might be to try different two
+;	digit hex values here, and see some different colors
+;
+       lda #$00		;load value into A ("it's a black thing")
+       sta COLUBK	;put the value of A into the background color register
+
+;
+;	Do the same basic thing for missile zero...
+;	(except missiles are the same color as their associated
+;	player, so we're setting the player's color instead
+;
+
+       lda #33
+       sta COLUP0
+
+;
+;	Now we start our main loop
+;	like most Atari programs, we'll have distinct
+;	times of Vertical Sync, Vertical Blank,
+;	Horizontal blank/screen draw, and then Overscan
+;
+;	So every time we return control to Mainloop.
+;	we're doing another television frame of our humble demo
+;	And inside mainloop, we'll keep looping through the
+;	section labeled Scanloop...once for each scanline
+;
+
+MainLoop
+;*********************** VERTICAL SYNC HANDLER
+;
+;	If you read your Stella Programmer's Guide,
+;	you'll learn that bit "D1" of VSYNC needs to be
+;	set to 1 to turn on the VSYNC, and then later
+;	you set the same bit to zero to turn it off.
+;	bits are numbered from right to left, starting
+;	with zero...that means VSYNC needs to be set with something
+;	like 00000010 , or any other pattern where "D1" (i.e. second
+;	bit from the right) is set to 1.  00000010 in binary
+;	is two in decimal, so let's just do that:
+;
+	lda  #2
+	sta  VSYNC	; Sync it up you damn dirty television!
+			; and that vsync on needs to be held for three scanlines...
+			; count with me here,
+	sta  WSYNC	; one... (our program waited for the first scanline to finish...)
+	sta  WSYNC 	; two... (btw, it doesn't matter what we put in WSYNC, it could be anything)
+	sta  WSYNC	; three...
+
+;	We blew off that time of those three scanlines, though theoretically we could have
+;	done some logic there...but most programs will definately want the vertical blank time
+;	that follows...
+;	you might want to do a lot of things in those 37 lines...so many
+;	things that you might become like Dirty Harry: "Did I use up 36 scanlines,
+;	or 37? Well, to tell you the truth, in all this excitement, I've kinda lost track
+;	myself."  So here's what we do...The Atari has some Timers built in.  You set these
+;	with a value, and it counts down...then when you're done thinking, you kill time
+;	until that timer has clicked to zero, and then you move on.
+;
+;	So how much time will those 37 scan lines take?
+;	Each scanline takes 76 cycles (which are the same thing our clock is geared to)
+;	37*76 = 2812 (no matter what Nick Bensema tries to tell us...his "How to Draw
+;	A Playfield" is good in a lot of other ways though..to quote the comments from
+;	that:
+;		 We must also subtract the five cycles it will take to set the
+;		 timer, and the three cycles it will take to STA WSYNC to the next
+;		 line.  Plus the checking loop is only accurate to six cycles, making
+; 		a total of fourteen cycles we have to waste.
+;
+;	So, we need to burn 2812-14=2798 cycles.  Now, there are a couple of different
+;	timers we can use, and Nick says the one we usually use to make it work out right
+;	is TIM64T, which ticks down one every 64 cycles.  2798 / 64 = 43.something,
+;	but we have to play conservative and round down.
+;
+
+	lda  #43	;load 43 (decimal) in the accumulator
+	sta  TIM64T	;and store that in the timer
+
+	lda #0		;Zero out the VSYNC
+	sta  VSYNC 	; 'cause that time is over
+
+;
+;	So RIGHT HERE we can do a ton of game logic, and we don't have
+;	to worry too much about how many instructions we're doing,
+;	as long as it's less than 37 scanlines worth (if it's not
+;	less, your program is a little screwed, and you need to
+;   write better time-tighter code, or put the code in the
+;   overscan or elsewhere.
+;
+;*********************** VERTICAL BLANK WAIT-ER
+WaitForVblankEnd
+	lda INTIM	;load timer...
+	bne WaitForVblankEnd	;killing time if the timer's not yet zero
+
+	ldy #191 	;Y is going to hold how many lines we have to do
+			;...we're going to count scanlines here. theoretically
+			; since this example is ass simple, we could just repeat
+			; the timer trick, but often its important to know
+			; just what scan line we're at.
+	sta WSYNC
+	sta VBLANK
+
+			;End the VBLANK period with the zero
+			;(since we already have a zero in "A"...or else
+			;the BNE wouldn't have let us get here! Atari
+			;is full of double use crap like that, and you
+			;should comment when you do those tricks)
+			;We do a WSYNC just before that so we don't turn on
+			;the image in the middle of a line...an error that
+			;would be visible if the background color wasn't black.
+
+	;HMM0 is the "horizontal movement register" for Missile 0
+	;we're gonna put in a -1 in the left 4 bits ("left nibble",
+	; use the geeky term for it)...it's important
+	;to note that it's the left 4 bits that metters, what's in the
+	;right just doesn't matter, hence the number is #$X0, where
+	;X is a digit from 0-F.  In two's complement notation, -1
+	;is F if we're only dealing with a single byte.
+	;
+	; Are you having fun yet?
+	;
+
+	lda #$F0	; -1 in the left nibble, who cares in the right
+	sta HMM0	; stick that in the missile mover
+
+	sta WSYNC	;wait for one more line, so we know things line up
+	sta HMOVE 	;and activate that movement
+			;note...for godawful reasons, you must do HMOVE
+			;right after a damn WSYNC. I might be wasting a scanline
+			;with this, come to think of it
+
+;*********************** Scan line Loop
+ScanLoop
+
+	sta WSYNC 	;Wait for the previous line to finish
+	lda #2		;now sticking a 2 in ENAM0 (i.e. bit D1) will enable Missile 0
+	sta ENAM0	;we could've done this just once for the whole program
+			;since we never turn it off, but i decided to do it again and
+			;again, since usually we'd have to put smarter logic in
+			; each horizontal blank
+			;
+			;so at some point in here, after 68 clock cycles to be exact,
+			;TIA will start drawing the line...all the missiles and players
+			;and what not better be ready...unless we *really* know what
+			;we're doing.
+
+	dey		;subtract one off the line counter thingy
+	bne ScanLoop	;and repeat if we're not finished with all the scanlines.
+
+	lda #2		;#2 for the VBLANK...
+	sta WSYNC  	;Finish this final scanline.
+	sta VBLANK 	; Make TIA output invisible for the overscan,
+			; (and keep it that way for the vsync and vblank)
+;***************************** OVERSCAN CALCULATIONS
+;
+;I'm just gonna count off the 30 lines of the overscan.
+;You could do more program code if you wanted to.
+
+
+	ldx #30		;store 30
+OverScanWait
+	 sta WSYNC
+	 dex
+	 bne OverScanWait
+
+	jmp  MainLoop      ;Continue this loop forver! Back to the code for the vsync etc
+
+
+; OK, last little bit of crap to take care of.
+; there are two special memory locations, $FFFC and $FFFE
+; When the atari starts up, a "reset" is done (which has nothing to do with
+; the reset switch on the console!) When this happens, the 6502 looks at
+; memory location $FFFC (and by extension its neighbor $FFFD, since it's
+; seaching for both bytes of a full memory address)  and then goes to the
+; location pointed to by $FFFC/$FFFD...so our first .word Start tells DASM
+; to put the binary data that we labeled "Start" at the location we established
+; with org.  And then we do it again for $FFFE/$FFFF, which is for a special
+; event called a BRK which you don't have to worry about now.
+
+	org $FFFC
+	.word Start
+	.word Start
+
+</pre>
+<hr>
+Whoo! Now, what three mistakes could I have possibly made? (All of these
+were corrected in the code you see above.)
+<ol>
+<li>I didn't read the SPG well enough, and kind of missed that WSYNC has to immediately
+precede HMOVE (Thanks Thomas)
+<li>I didn't read the SPG well enough and was just trying to fiddle with the rightmost bits
+of HMM0 (Thanks again Thomas)
+<li>I was kind of stupid, and tried to do an HMOVE right after the WSYNC for every scanline,
+	not every tv picture frame! That's one I caught myself when what should've been a nice
+	vertical line was broken up into a bunch of little jumpy bits.
+</ol>
+You might want to go ahead and figure out how to change the speed of the line, as well
+as the color.
+<br><br>
+<i>PS...it turns out I made FOUR mistakes...the fourth was I didn't do that additional WSYNC before
+turning off the VBLANK, so when I change the background todifferent colors you only see half of the
+top line. Thanks, yet again, Thomas. </i>
+
+
+<br><br>
+Next: <a href="04clink.html">Kernal Clink</a>
+
+
+
+
+<table border=1><tr><td>
+<a href="index.html">Introduction</a> -
+<a href="01env.html">The Development Environment</a> -
+<a href="02breach.html">Into The Breach</a> -
+<a href="03first.html">My First Program</a> - <br>
+<a href="04clink.html">Kernal Clink</a> -
+<a href="05joy.html">The Joy of Sticks</a> -
+<a href="06happy.html">Happy Face</a> -
+<a href="07buffer.html">PlayerBufferStuffer</a>
+</td><tr></table>

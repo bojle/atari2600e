@@ -1,0 +1,148 @@
+<body bgcolor="white">
+<b><font face="arial" size=5>2600 101</font></b>:
+<i><b><font face="arial" size=4>Into The Breach</font></b></i>
+<br><br>
+
+Now you should be ready to learn a bit more about what you're doing.  <br><br>
+
+First off, you should consider strongly consider
+reading through "Assembly In One Step" if you don't know 6502 Assembly,
+and at least skim through
+ the Stella Programmer's Guide (See our <a href="index.html#infores">Information Resources</a>
+section for those.) There's a lot that I'm not going to explain here--there's a
+lot I don't know enough to explain here!--and you'll likely find your self turning to these
+resources again and again.
+<br><br>
+
+<b><font face="arial" size=5>Our Friend The Television</font></b><br>
+(This section is mostly just a rehash of the first few pages of the
+Stella Programmer's Guide)<br>
+A television works by aiming a stream of electrons at the screen,
+moving it quickly across the glass in front.  (Bear with me here,
+Mr. Wizard I ain't.)  It fires that stream left to right
+(from the viewer's perspective)
+across
+the screen for one "scan line", zips back to the left side, moves
+down, and does the next scan line. There are 192 visible scan lines
+on a TV. And your atari program has to tell the TIA
+(Television Interface Adaptor) what to put on each line, a splitsecond
+before it starts drawing that line. (Well, you can skip telling TIA what
+to do every other line to give your program more time to think...it will
+just make a copy of the line before. More on that later.)
+
+<br><br>
+
+But there's more to this process then that visible picture...thankfully! Otherwise
+you'd be spending almost all your meager computing power telling TIA
+what to draw, without the time to make the calculations for the rest of
+your game.  There are four distinct "intervals" of what the electron
+beam (sounds very scifi, don't it?) is doing...five, in fact, when you
+realize there's a bit of time before the electron beam starts drawing
+each individual scanline. (that time is called the "horizontal blank")
+<br><br>
+So, life in the Atari/Television world is divided into "clock counts", 228 per scanline.
+Each "Machine Cycle" takes up 3 clock counts...and the actual assembly instructions
+take 2-6 machine cycles,so you don't have a lot of time to do computations.
+
+<br><br>
+Let me do my own version of that Stella Programmer's Guide diagram:
+<br>
+<img src="scanlines.gif" border=1>
+<br>
+Here's what's going on.
+First, the CPU has to send the VSYNC. This message gets to the TV
+and tells it to get ready to start a new "frame", or picture. But you
+can't just hit it and quit it...the CPU has to wait for 3 whole scanlines
+for the Television to get the message.  Luckily, waiting for a scanline
+to finish drawing is one of the things the Atari does best...you'll
+learn that when you "do a WSYNC", the CPU halts, and waits for the current
+scan line to finish.  So an Atari Program turns on the VSYNC, does WSYNCs three times,
+the turns the VSYNC off. Now the TV's good to go.<br><br>
+
+Now the Atari enters the time known as the "Vertical Blank".
+The TV hasn't
+really begun to draw the picture yet...it won't for another 37
+scanlines.
+In fact, the CPU needs to turn on a special "VBLANK" register that says there's
+no picture here.
+
+In general, there are two strategies for this time.  The most obvious
+strategy is to just do another 37 WSYNCs.  A better strategy (we'll learn
+the details of this in a bit) is to set one of the Atari's timers.  That
+way we can do alot of the game logic we want
+(move things, check collisions, fiddle with memory, all the jazz) without having
+to know if a series of instructions fits in a particular scanline or not.
+We set a calculated amount into a timer, then once our program logic
+is done logic'ing, we  do a "do-nothing" loop until the timer equals zero. Then we turn
+off VBLANK. And then we move on.
+<br><br>
+
+Time to start drawing...almost.  For each line, you get about 22 Machine Cycles of
+"Horizontal Blank" to do some work...usually spent telling the TIA if the various players
+and missiles and playfields (oy, you'll find out them in a bit) are "on" for the upcoming line
+and then the electron starts drawing.  Now, the Stella Programmer's Guide talks about
+how you can get extra time to do game calculations by only setting TIA every <i>other</i>
+line...and programmers who are really slick can do all sorts of logic on the fly,
+have everything ready to go for the TIA just in time, and still be home in time for dinner.
+<br><br>
+Now, from what I've seen, most programmers will count the # of scanlines, rather than
+use the timer trick I mentioned for the vertical blank...that's
+because of how important it is to tell the
+TIA "is this object (player, missile, ball) 'on' for <i>this</i> scan line".<br><br>
+
+So, it's a very different world from most computer programming, where you can just set
+pixels on the screen and they stay there.  One saving grace is that the TIA holds the
+last values you set, so you <i>don't</i> have to redo every damn thing every damn line.
+Still, it's pretty challenging.
+<br><br>
+Once you've done the 192 lines (or so...sometimes the math gets a little crooked)
+you get another respite, the "overscan" period. This is just like the vertical blank,
+except its only 30 lines, not 37.  So you should set the VBLANK
+it might make sense to do the timer trick
+again, and do some more program logic.<br><br>
+
+
+Once the overscan is finished, it's time to start over with the VSYNC. (Note that if you've
+turn on VBLANK at the start of the the overscan, you might as well leave it on throughout
+the vertical sync, since the vertical blank period needs it too.)
+<br><br>
+
+So that was a lot to get through, but believe me, we need to get a handle
+on this to have <i>any</i> idea what's going on as we start to look
+at even the simplest Atari programs.
+<br><br>
+
+
+<i>By The Way: all of the above applies only to NTSC televisions,
+the video standard in the United States (and Canada, Mexico and Japan).
+There's also a video standard called "PAL" used in Europe and some
+other places. PAL has 312 scanlines, and refreshes a bit slower.
+(50 framers per second for PAL, 60 for NTSC). And the colors are a
+bit different. There are techniques for programming around these
+differences, but I'm not going to get into that anywhere in this
+tutorial.
+<br><br>
+Oh, and the diagram above is a bit of a lie...really, there's
+some "horizontal blank" time on either side of the visible
+image, the part you can see isn't really on the right side like
+that. But in practice, the view in the illustration is good enough.
+</i>
+
+
+
+<br><br>
+Next: <a href="03first.html">My First Program</a>
+
+
+
+
+<table border=1><tr><td>
+<a href="index.html">Introduction</a> -
+<a href="01env.html">The Development Environment</a> -
+<a href="02breach.html">Into The Breach</a> -
+<a href="03first.html">My First Program</a> - <br>
+<a href="04clink.html">Kernal Clink</a> -
+<a href="05joy.html">The Joy of Sticks</a> -
+<a href="06happy.html">Happy Face</a> -
+<a href="07buffer.html">PlayerBufferStuffer</a>
+</td><tr></table>

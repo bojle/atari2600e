@@ -3,3 +3,6 @@
 3. Atari 2600 Hardware <https://en.wikipedia.org/wiki/Atari_2600_hardware>
 4. Atari 2600 Programming Guide - Steve Wright <https://www.alienbill.com/2600/101/docs/stella.html>
 5. Atari 2600 Teardown <https://www.ifixit.com/Teardown/Atari+2600+Teardown/3541>
+6. TIA 1A Manual <https://www.atariarchives.org/dev/tia/>
+7. 6502 Instruction Set - Masswerk <https://www.masswerk.at/6502/6502_instruction_set.html>
+8. One Step Assembly - Kirk Israel 

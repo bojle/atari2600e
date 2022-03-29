@@ -1233,7 +1233,18 @@ int tay(byte_t opcode) {
 	return 0;	
 }
 
-int tsx(byte_t opcode) {}
+int tsx(byte_t opcode) {
+	byte_t S = fetch_S();
+	set_X(A);
+	if ((S >> 7) == 1) {
+		set_STATUS(STATUS_N);
+	}
+	if (S == 0) {
+		set_STATUS(STATUS_Z);
+	}
+	return 0;	
+
+}
 
 int txa(byte_t opcode) {
 	byte_t X = fetch_X();
@@ -1247,7 +1258,10 @@ int txa(byte_t opcode) {
 	return 0;	
 }
 
-int txs(byte_t opcode) {}
+int txs(byte_t opcode) {
+	set_S(fetch_X());
+	return 0;
+}
 
 int tya(byte_t opcode) {
 	byte_t Y = fetch_Y();

@@ -1,0 +1,185 @@
+<body bgcolor="white">
+<b><font face="arial" size=5>2600 101</font></b>:
+<i><b><font face="arial" size=4>Kernal Clink</font></b></i>
+<br><br>
+
+OK! We made it through our first program.  Our second is
+going to be darn similar. Baby steps and all that.
+<br><br>
+The last program was a line, because that was about the easiest
+thing I could think to make, since we didn't have to do anything
+on every scanline. (Heck, we didn't even really have to do everything
+for every frame, except for the HMOVE.) So now we're going to make
+something just slightly more complex, a moving dot.  <br><br>
+
+Why is a dot more complex than a line? Because we have to
+figure out when to turn the dot on, and when to turn it off.
+The code that you do during the scanlines (as opposed to
+during the Overscan or Vertical Blank) is called the
+"kernal" code, and it has to be <i>tight</i>, because
+you have very little time to do program logic.  Sometimes,
+you might need 2 scanlines to do all your thinking, thus
+making a "two line kernal". (Though in that case, you have
+to be careful...since a lot of the kernal is setting up
+the graphical "things", if you change those things while
+the line is being drawn, weird things might result. Also
+wonderful things, if you're very careful with the timing...
+more careful than I've learned to be.)
+<br><br>
+Anyay, lets dive right into the code. I'll try to focus on
+commenting mostly on the new stuff, which
+I'll
+<font color="red">put in red</font> for your reading convenience.
+(This means you should copy and paste from the web browser
+directly, not using "View Source"...and of course you still need the vcs.h file.)
+<br><br>
+Actually, we'll use one other file: "macro.h" is a file full of
+convenient "macros", or little bitty programs DASM runs as it puts
+your program together. It's a lot like vcs.h.
+The current standard can be downloaded from
+<a href="http://atari2600.org/dasm">DASM's official homepage</a>,
+in the "Atari 2600 Support Files" Zip file.
+Here's <a href="bin/macro.h">a local copy of macro.h</a>.
+
+
+
+
+<hr><pre>
+; a moving dot by Kirk Israel
+
+	processor 6502
+	include vcs.h
+<font color="red">	include macro.h</font>
+	org $F000
+
+
+
+;we start by setting up two "variables"
+;this means we tell DASM that when we say
+;variablename, we mean this specific memory
+;location (we have $80 to $FF to play with)
+
+<font color="red">;we'll use this one to store the vertical position</font>
+<font color="red">YPosFromBot = $80;</font>
+<font color="red">;more on the use of this variable below</font>
+<font color="red">VisibleMissileLine = $81;</font>
+
+Start
+
+<font color="red">;generic start up stuff from macro.h...</font>
+	<font color="red">CLEAN_START</font>
+
+
+
+	lda #$00
+	sta COLUBK
+	lda #66		;Lets go for purpley!
+	sta COLUP0
+
+<font color="red">	lda #80
+	sta YPosFromBot	;set Initial Y Position
+
+	;NUSIZ0 sets the size and duplication
+	;of the sprite and missiles --see the Stella
+	;guide for details
+	lda #$20
+	sta NUSIZ0 ;Quad Width for now
+</font>
+
+;VSYNC time
+MainLoop
+	lda  #2
+	sta  VSYNC
+	sta  WSYNC
+	sta  WSYNC
+	sta  WSYNC
+	lda  #43
+	sta  TIM64T
+	lda #0
+	sta  VSYNC
+
+<font color="red">	;#% is a way of indicating a binary actual number</font>
+<font color="red">	;(just like #$ starts a hex number and # a decimal number)</font>
+
+<font color="red">	lda #%00010000  ;put value of 1 in the left nibble (slow move right)</font>
+	sta HMM0	;set the move for missile 0
+
+WaitForVblankEnd
+	lda INTIM
+	bne WaitForVblankEnd
+	ldy #191
+	sta WSYNC
+	sta VBLANK
+
+	sta WSYNC
+	sta HMOVE
+
+;main scanline loop...
+ScanLoop
+	sta WSYNC
+<font color="red">
+; here the idea is that VisibleMissileLine
+; is zero if the line isn't being drawn now,
+; otherwise it's however many lines we have to go
+
+; there are more efficient ways of doing this
+
+
+; we see if this is the line (line # stored in Y) is the
+; one that we start the missile on
+CheckActivateMissile
+	cpy YPosFromBot		;compare Y to the YPosFromBot...
+	bne SkipActivateMissile ;if not equal, skip this...
+	lda #8			;otherwise say that this should go
+	sta VisibleMissileLine	;on for 8 lines
+SkipActivateMissile
+
+;turn missile off then see if it's turned on
+	lda #0
+	sta ENAM0
+;
+;if the VisibleMissileLine is non zero,
+;we're drawing it
+;
+	lda VisibleMissileLine	;load the value of what missile line we're showing
+	beq FinishMissile	;if zero we aren't showing, skip it
+IsMissileOn
+	lda #2			;otherwise
+	sta ENAM0		;showit
+	dec VisibleMissileLine 	;and decrement the missile line thing
+FinishMissile
+</font>
+	dey		;decrement scanline counter
+	bne ScanLoop	;lather rinse repeat
+
+
+;overscan same as last time
+	lda #2
+	sta WSYNC
+	sta VBLANK
+	ldx #30
+OverScanWait
+	sta WSYNC
+	dex
+	bne OverScanWait
+	jmp  MainLoop
+
+	org $FFFC
+	.word Start
+	.word Start
+</pre><hr>
+
+
+Next: <a href="05joy.html">The Joy of Sticks</a>
+
+
+<table border=1><tr><td>
+<a href="index.html">Introduction</a> -
+<a href="01env.html">The Development Environment</a> -
+<a href="02breach.html">Into The Breach</a> -
+<a href="03first.html">My First Program</a> - <br>
+<a href="04clink.html">Kernal Clink</a> -
+<a href="05joy.html">The Joy of Sticks</a> -
+<a href="06happy.html">Happy Face</a> -
+<a href="07buffer.html">PlayerBufferStuffer</a>
+</td><tr></table>
