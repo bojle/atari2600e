@@ -564,12 +564,103 @@ int dey(byte_t opcode) {
 	return 0;
 }
 
-int eori(byte_t opcode) {}
-int eorz(byte_t opcode) {}
-int eorzx(byte_t opcode) {}
-int eor(byte_t opcode) {}
-int eorax(byte_t opcode) {}
-int eoray(byte_t opcode) {}
+int eori(byte_t opcode) {
+	byte_t opereor = fetch_opereor(opcode);
+	byte_t A = fetch_A();
+	A ^= opereor;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int eorz(byte_t opcode) {
+	addr_t opereor = fetch_opereor(opcode);
+	byte_t value = fetch_byte(opereor);
+	byte_t A = fetch_A();
+	A ^= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int eorzx(byte_t opcode) {
+	addr_t opereor = fetch_opereor(opcode);
+	opereor += fetch_X();
+	byte_t value = fetch_byte(opereor);
+	byte_t A = fetch_A();
+	A ^= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int eor(byte_t opcode) {
+	addr_t addr = fetch_opereor(opcode);
+	byte_t value = fetch_byte(addr);
+	byte_t A = fetch_A();
+	A ^= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int eorax(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_opereor(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t A = fetch_A();
+	A ^= value;	
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
+int eoray(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_opereor(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t A = fetch_A();
+	A ^= value;	
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
+// TODO: Add Impl
 int eorinx(byte_t opcode) {}
 int eoriny(byte_t opcode) {}
 
@@ -945,18 +1036,112 @@ int lsrzx(byte_t opcode) {
 int lsr(byte_t opcode) {
 	return lsrz(opcode);
 }
+
 int lsrax(byte_t opcode) {
 	return lsrzx(opcode);
 }
 
-int nop(byte_t opcode) {}
+int nop(byte_t opcode) {
+	return 0;
+}
 
-int orai(byte_t opcode) {}
-int oraz(byte_t opcode) {}
-int orazx(byte_t opcode) {}
-int ora(byte_t opcode) {}
-int oraax(byte_t opcode) {}
-int oraay(byte_t opcode) {}
+int orai(byte_t opcode) {
+	byte_t operora = fetch_operora(opcode);
+	byte_t A = fetch_A();
+	A |= operora;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+
+int oraz(byte_t opcode) {
+	addr_t operora = fetch_operora(opcode);
+	byte_t value = fetch_byte(operora);
+	byte_t A = fetch_A();
+	A |= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int orazx(byte_t opcode) {
+	addr_t operora = fetch_operora(opcode);
+	operora += fetch_X();
+	byte_t value = fetch_byte(operora);
+	byte_t A = fetch_A();
+	A |= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int ora(byte_t opcode) {
+	addr_t addr = fetch_operora(opcode);
+	byte_t value = fetch_byte(addr);
+	byte_t A = fetch_A();
+	A |= value;
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return 0;
+}
+int oraax(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operora(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t A = fetch_A();
+	A |= value;	
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
+int oraay(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operora(opcode);
+	addr_t new_addr = addr + fetch_X();
+	byte_t value = fetch_byte(new_addr);
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t A = fetch_A();
+	A |= value;	
+	if ((A >> 7) == 1) { 	// 7th bit of A is set
+		set_STATUS(STATUS_N);
+	}
+	if (A == 0) {			// Result of last operation was zero
+		set_STATUS(STATUS_Z);
+	}
+	set_A(A);
+	return extra_cycles;
+}
+
 int orainx(byte_t opcode) {}
 int orainy(byte_t opcode) {}
 
