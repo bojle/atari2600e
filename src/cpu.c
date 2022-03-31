@@ -399,23 +399,111 @@ int clv(byte_t opcode) {
 	clear_STATUS(STATUS_V);
 }
 
-int cmpi(byte_t opcode) {
+void compare(byte_t b1, byte_t b2) {
+	if (b1 < b2) {
+		set_STATUS(STATUS_N);
+		clear_STATUS(STATUS_Z);
+		clear_STATUS(STATUS_C);
+	}
+	else if (b1 == b2) {
+		clear_STATUS(STATUS_N);
+		set_STATUS(STATUS_Z);
+		clear_STATUS(STATUS_C);
+	}
+	else if (b1 > b2) {
+		clear_STATUS(STATUS_N);
+		clear_STATUS(STATUS_Z);
+		set_STATUS(STATUS_C);
+	}
 }
 
-int cmpz(byte_t opcode) {}
+int cmpi(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
+	compare(fetch_A(), operand);
+	return 0;
+}
 
-int cmpzx(byte_t opcode) {}
-int cmp(byte_t opcode) {}
-int cmpax(byte_t opcode) {}
-int cmpay(byte_t opcode) {}
-int cmpinx(byte_t opcode) {}
+int cmpz(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	byte_t value = fetch_byte(addr);
+	compare(fetch_A(), value);
+	return 0;
+}
+
+int cmpzx(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	addr += fetch_X();
+	byte_t value = fetch_byte(addr);
+	compare(fetch_A(), value);
+	return 0;
+}
+
+int cmp(byte_t opcode) {
+	return cmpz(opcode);
+}
+
+int cmpax(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_X();
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t value = fetch_byte(new_addr);
+	compare(fetch_A(), value);
+	return extra_cycles;
+}
+
+int cmpay(byte_t opcode) {
+	byte_t extra_cycles = 0;
+	addr_t addr = fetch_operand(opcode);
+	addr_t new_addr = addr + fetch_Y();
+	if (page_boundary_crossed(addr, new_addr)) {
+		extra_cycles++;
+	}
+	byte_t value = fetch_byte(new_addr);
+	compare(fetch_A(), value);
+	return extra_cycles;
+}
+
+int cmpinx(byte_t opcode) {
+
+}
+
 int cmpiny(byte_t opcode) {}
-int cpxi(byte_t opcode) {}
-int cpxz(byte_t opcode) {}
-int cpx(byte_t opcode) {}
-int cpyi(byte_t opcode) {}
-int cpyz(byte_t opcode) {}
-int cpy(byte_t opcode) {}
+
+int cpxi(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
+	compare(fetch_X(), operand);
+	return 0;
+}
+int cpxz(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	byte_t value = fetch_byte(addr);
+	compare(fetch_X(), value);
+	return 0;
+}
+
+int cpx(byte_t opcode) {
+	return cpxz(opcode);
+}
+
+int cpyi(byte_t opcode) {
+	byte_t operand = fetch_operand(opcode);
+	compare(fetch_Y(), operand);
+	return 0;
+}
+
+int cpyz(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	byte_t value = fetch_byte(addr);
+	compare(fetch_Y(), value);
+	return 0;
+}
+
+int cpy(byte_t opcode) {
+	return cpyz(opcode);
+}
 
 int decz(byte_t opcode) {
 	addr_t operand = fetch_operand(opcode);
