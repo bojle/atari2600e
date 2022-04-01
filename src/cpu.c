@@ -143,12 +143,8 @@ int adcay(byte_t opcode) {
 	return extra_cycles;
 }
 
-int adcinx(byte_t opcode) {
-	
-}
-int adciny(byte_t opcode) {
-
-}
+int adcinx(byte_t opcode) {}
+int adciny(byte_t opcode) {}
 
 int andi(byte_t opcode) {
 	byte_t operand = fetch_operand(opcode);
@@ -466,10 +462,7 @@ int cmpay(byte_t opcode) {
 	return extra_cycles;
 }
 
-int cmpinx(byte_t opcode) {
-
-}
-
+int cmpinx(byte_t opcode) {}
 int cmpiny(byte_t opcode) {}
 
 int cpxi(byte_t opcode) {
@@ -565,9 +558,9 @@ int dey(byte_t opcode) {
 }
 
 int eori(byte_t opcode) {
-	byte_t opereor = fetch_opereor(opcode);
+	byte_t operand = fetch_operand(opcode);
 	byte_t A = fetch_A();
-	A ^= opereor;
+	A ^= operand;
 	if ((A >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
@@ -578,8 +571,8 @@ int eori(byte_t opcode) {
 	return 0;
 }
 int eorz(byte_t opcode) {
-	addr_t opereor = fetch_opereor(opcode);
-	byte_t value = fetch_byte(opereor);
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
 	byte_t A = fetch_A();
 	A ^= value;
 	if ((A >> 7) == 1) { 	// 7th bit of A is set
@@ -592,9 +585,9 @@ int eorz(byte_t opcode) {
 	return 0;
 }
 int eorzx(byte_t opcode) {
-	addr_t opereor = fetch_opereor(opcode);
-	opereor += fetch_X();
-	byte_t value = fetch_byte(opereor);
+	addr_t operand = fetch_operand(opcode);
+	operand += fetch_X();
+	byte_t value = fetch_byte(operand);
 	byte_t A = fetch_A();
 	A ^= value;
 	if ((A >> 7) == 1) { 	// 7th bit of A is set
@@ -607,7 +600,7 @@ int eorzx(byte_t opcode) {
 	return 0;
 }
 int eor(byte_t opcode) {
-	addr_t addr = fetch_opereor(opcode);
+	addr_t addr = fetch_operand(opcode);
 	byte_t value = fetch_byte(addr);
 	byte_t A = fetch_A();
 	A ^= value;
@@ -622,7 +615,7 @@ int eor(byte_t opcode) {
 }
 int eorax(byte_t opcode) {
 	byte_t extra_cycles = 0;
-	addr_t addr = fetch_opereor(opcode);
+	addr_t addr = fetch_operand(opcode);
 	addr_t new_addr = addr + fetch_X();
 	byte_t value = fetch_byte(new_addr);
 	if (page_boundary_crossed(addr, new_addr)) {
@@ -642,7 +635,7 @@ int eorax(byte_t opcode) {
 
 int eoray(byte_t opcode) {
 	byte_t extra_cycles = 0;
-	addr_t addr = fetch_opereor(opcode);
+	addr_t addr = fetch_operand(opcode);
 	addr_t new_addr = addr + fetch_X();
 	byte_t value = fetch_byte(new_addr);
 	if (page_boundary_crossed(addr, new_addr)) {
@@ -725,10 +718,39 @@ int iny(byte_t opcode) {
 }
 
 int jmp(byte_t opcode) {
-}
+	addr_t addr = fetch_operand(opcode);
+	addr -= inst_bytes(opcode);
+	set_PC(addr);
+	return 0;
+} 
+
 int jmpin(byte_t opcode) {
+	addr_t operand = fetch_operand(opcode);
+	addr_t addr = fetch_byte(operand);
+	/* addr plus 1 */
+	addr_t addrp1 = fetch_operand(operand + 1);
+	addrp1 <<= 8;
+	addr += addrp1;
+	addr -= inst_bytes(opcode);
+	set_PC(addr);
 }
-int jsr(byte_t opcode) {}
+
+int jsr(byte_t opcode) {
+	/* The address that the program needs to jump to */
+	addr_t addr = fetch_operand(opcode);
+	addr -= inst_bytes(opcode);
+
+	addr_t pc = fetch_PC();
+	pc += inst_bytes(opcode);
+	/* pc now points to the next instruction */
+	byte_t hpc = (pc >> 8);
+	byte_t lpc = pc;
+	stack_push(hpc);
+	stack_push(lpc);
+	
+	set_PC(addr);
+	return 0;
+}
 
 int ldai(byte_t opcode) {
 	byte_t operand = fetch_operand(opcode);
@@ -1046,9 +1068,9 @@ int nop(byte_t opcode) {
 }
 
 int orai(byte_t opcode) {
-	byte_t operora = fetch_operora(opcode);
+	byte_t operand = fetch_operand(opcode);
 	byte_t A = fetch_A();
-	A |= operora;
+	A |= operand;
 	if ((A >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
@@ -1060,8 +1082,8 @@ int orai(byte_t opcode) {
 }
 
 int oraz(byte_t opcode) {
-	addr_t operora = fetch_operora(opcode);
-	byte_t value = fetch_byte(operora);
+	addr_t operand = fetch_operand(opcode);
+	byte_t value = fetch_byte(operand);
 	byte_t A = fetch_A();
 	A |= value;
 	if ((A >> 7) == 1) { 	// 7th bit of A is set
@@ -1074,9 +1096,9 @@ int oraz(byte_t opcode) {
 	return 0;
 }
 int orazx(byte_t opcode) {
-	addr_t operora = fetch_operora(opcode);
-	operora += fetch_X();
-	byte_t value = fetch_byte(operora);
+	addr_t operand = fetch_operand(opcode);
+	operand += fetch_X();
+	byte_t value = fetch_byte(operand);
 	byte_t A = fetch_A();
 	A |= value;
 	if ((A >> 7) == 1) { 	// 7th bit of A is set
@@ -1089,7 +1111,7 @@ int orazx(byte_t opcode) {
 	return 0;
 }
 int ora(byte_t opcode) {
-	addr_t addr = fetch_operora(opcode);
+	addr_t addr = fetch_operand(opcode);
 	byte_t value = fetch_byte(addr);
 	byte_t A = fetch_A();
 	A |= value;
@@ -1104,7 +1126,7 @@ int ora(byte_t opcode) {
 }
 int oraax(byte_t opcode) {
 	byte_t extra_cycles = 0;
-	addr_t addr = fetch_operora(opcode);
+	addr_t addr = fetch_operand(opcode);
 	addr_t new_addr = addr + fetch_X();
 	byte_t value = fetch_byte(new_addr);
 	if (page_boundary_crossed(addr, new_addr)) {
@@ -1124,7 +1146,7 @@ int oraax(byte_t opcode) {
 
 int oraay(byte_t opcode) {
 	byte_t extra_cycles = 0;
-	addr_t addr = fetch_operora(opcode);
+	addr_t addr = fetch_operand(opcode);
 	addr_t new_addr = addr + fetch_X();
 	byte_t value = fetch_byte(new_addr);
 	if (page_boundary_crossed(addr, new_addr)) {
@@ -1300,7 +1322,16 @@ int rorax(byte_t opcode) {
 }
 
 int rti(byte_t opcode) {}
-int rts(byte_t opcode) {}
+
+int rts(byte_t opcode) {
+	addr_t lpc = stack_pop();
+	addr_t hpc = stack_pop();
+	addr_t addr = (hpc << 8) + lpc;
+
+	addr -= inst_bytes(opcode);
+	set_PC(addr);
+	return 0;
+}
 
 int sbci(byte_t opcode) {
 	byte_t operand = fetch_operand(opcode);
@@ -1508,7 +1539,7 @@ int tay(byte_t opcode) {
 
 int tsx(byte_t opcode) {
 	byte_t S = fetch_S();
-	set_X(A);
+	set_X(S);
 	if ((S >> 7) == 1) {
 		set_STATUS(STATUS_N);
 	}
