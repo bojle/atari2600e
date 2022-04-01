@@ -112,4 +112,12 @@ void load_cartridge(char *filename) {
 	memcpy(mspace + CARMEM_START, tbuf, read_size);
 	log_trace("load_cartridge(): Loaded Cartridge Into Memory");
 	fclose(fp);
+
+	addr_t l = fetch_byte(CARMEM_END - 3);
+	addr_t h = fetch_byte(CARMEM_END - 2);
+	addr_t cart_entrypoint = (h << 8) + l;
+	if (cart_entrypoint < CARMEM_START) {
+		cart_entrypoint = CARMEM_START;
+	}
+	set_PC(cart_entrypoint);
 }

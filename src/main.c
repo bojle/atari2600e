@@ -13,14 +13,13 @@ int main(int argc, char *argv[]) {
 	inst_tbl_init();
 	disassembler_init();
 	load_cartridge(argv[1]);
-	set_PC(CARMEM_START);
 	
 	byte_t size = 0;
 	byte_t cycles = 0;
 	char *name;
 	byte_t opcode;
 	state_t state;
-	for (addr_t pc = fetch_PC(); pc < CARMEM_END; ) {
+	for (addr_t pc = fetch_PC(); pc < (CARMEM_END - 1); ) {
 		record_state(&state);
 		opcode = fetch_byte(pc);
 		size = inst_bytes(opcode);
