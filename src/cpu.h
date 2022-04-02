@@ -33,4 +33,10 @@ void record_state(state_t *s);
 void disassembler_init();
 void disassemble(byte_t opcode, state_t *s);
 
+/* status == 0 -> halt
+ * status == 1 -> run
+ */
+void cpu_set_status(_Bool status);
+_Bool cpu_fetch_status();
+
 #endif

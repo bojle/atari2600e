@@ -20,6 +20,9 @@
  * relative: name+r
  */
 
+
+static _Bool CPU_RUNNING = 0;
+
 /* Function pointer type for an instruction-function. */
 typedef int (*inst_fptr) (byte_t opcode);
 
@@ -2126,3 +2129,13 @@ void disassemble(byte_t opcode, state_t *s) {
 		   );
 	fprintf(disas_fp, "\tPC: 0x%04x\t\t\t0x%04x\n", s->PC, fetch_PC());
 }
+
+void cpu_set_status(_Bool status) {
+	CPU_RUNNING = status;
+}
+
+_Bool cpu_fetch_status() {
+	return CPU_RUNNING;
+}
+
+
