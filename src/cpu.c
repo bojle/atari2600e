@@ -430,8 +430,19 @@ int beq(byte_t opcode) {
 	return branch_aux(opcode);
 }
 
-int bitz(byte_t opcode) {}
-int bit(byte_t opcode) {}
+int bitz(byte_t opcode) {
+	addr_t addr = fetch_operand(opcode);
+	byte_t value = fetch_byte(addr);
+	(((value & 0x40) >> 6) == 1) ? set_STATUS(STATUS_V) : clear_STATUS(STATUS_V);
+	(((value & 0x80) >> 7) == 1) ? set_STATUS(STATUS_N) : clear_STATUS(STATUS_N);
+	value &= fetch_A();
+	(value == 1) ? set_STATUS(STATUS_Z) : clear_STATUS(STATUS_Z);
+	return 0;
+}
+
+int bit(byte_t opcode) {
+	return bitz(opcode);
+}
 
 int bmi(byte_t opcode) {
 	if (fetch_STATUS(STATUS_N) != 1) {
@@ -453,7 +464,9 @@ int bpl(byte_t opcode) {
 	return branch_aux(opcode);
 }
 
-int brk(byte_t opcode) {}
+int brk(byte_t opcode) {
+	return 0;
+}
 
 int bvc(byte_t opcode) {
 	if (fetch_STATUS(STATUS_V) != 0) {
@@ -860,6 +873,7 @@ int jmpin(byte_t opcode) {
 	addr += addrp1;
 	addr -= inst_bytes(opcode);
 	set_PC(addr);
+	return 0;
 }
 
 int jsr(byte_t opcode) {
@@ -1456,7 +1470,9 @@ int rorax(byte_t opcode) {
 	return rorzx(opcode);
 }
 
-int rti(byte_t opcode) {}
+int rti(byte_t opcode) {
+	return 0;
+}
 
 int rts(byte_t opcode) {
 	addr_t lpc = stack_pop();
@@ -2096,18 +2112,17 @@ void disassemble(byte_t opcode, state_t *s) {
 	}
 	fprintf(disas_fp, "%s (0x%02x,%d,%d)\t0x%04x\n", inst_name(opcode),
 			opcode, size, inst_cycles(opcode), operand);
-	fprintf(disas_fp, "\tOLD STATE\t\tNEW STATE\n");
-	fprintf(disas_fp, "\tA:\t0x%x,%d\t\t0x%x,%d\n", s->A, s->A, fetch_A(), fetch_A());
-	fprintf(disas_fp, "\tX:\t0x%x,%d\t\t0x%x,%d\n", s->X, s->X, fetch_X(), fetch_X());
-	fprintf(disas_fp, "\tY:\t0x%x,%d\t\t0x%x,%d\n", s->Y, s->Y, fetch_Y(), fetch_Y());
-	fprintf(disas_fp, "\tS:\t0x%x,%d\t\t0x%x,%d\n", s->S, s->S, fetch_S(), fetch_S());
-	//fprintf(disas_fp, "\tP:\t0x%x,%d\t\t0x%x,%d\n", s->P, s->P, fetch_P(), fetch_P());
-	fprintf(disas_fp, "\tN V B D I Z C\t\tN V B D I Z C\n");
-	fprintf(disas_fp, "\t%d %d %d %d %d %d %d\t\t%d %d %d %d %d %d %d\n",
+	fprintf(disas_fp, "\tOLD STATE\t\t\tNEW STATE\n");
+	fprintf(disas_fp, "\tA: 0x%02x,%d\t\t\t0x%02x,%d\n", s->A, s->A, fetch_A(), fetch_A());
+	fprintf(disas_fp, "\tX: 0x%02x,%d\t\t\t0x%02x,%d\n", s->X, s->X, fetch_X(), fetch_X());
+	fprintf(disas_fp, "\tY: 0x%02x,%d\t\t\t0x%02x,%d\n", s->Y, s->Y, fetch_Y(), fetch_Y());
+	fprintf(disas_fp, "\tS: 0x%04x\t\t\t0x%04x\n", s->S, fetch_S());
+	fprintf(disas_fp, "\tN V B D I Z C\t\t\tN V B D I Z C\n");
+	fprintf(disas_fp, "\t%d %d %d %d %d %d %d\t\t\t%d %d %d %d %d %d %d\n",
 			s->P_N, s->P_V, s->P_B, s->P_D, s->P_I, s->P_Z, s->P_C,
 			fetch_STATUS(STATUS_N), fetch_STATUS(STATUS_V), fetch_STATUS(STATUS_B),
 			fetch_STATUS(STATUS_D), fetch_STATUS(STATUS_I), fetch_STATUS(STATUS_Z),
 			fetch_STATUS(STATUS_C)
 		   );
-	fprintf(disas_fp, "\tPC:\t0x%x\t\t0x%x\n", s->PC, fetch_PC());
+	fprintf(disas_fp, "\tPC: 0x%04x\t\t\t0x%04x\n", s->PC, fetch_PC());
 }

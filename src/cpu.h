@@ -7,7 +7,7 @@ typedef struct state_t {
 	byte_t A;			
 	byte_t X;			
 	byte_t Y;			
-	byte_t S;			
+	addr_t S;			
 	byte_t P;			
 	addr_t PC;
 	_Bool P_C;
