@@ -5,6 +5,7 @@
 #include "mspace.h"
 #include "log.h"
 #include "except.h"
+#include "tia.h"
 
 
 /* The Address/Memory Space accessible to the CPU */
@@ -25,6 +26,9 @@ byte_t fetch_byte(addr_t addr) {
 }
 /* Set addr to b */
 void set_byte(addr_t addr, byte_t b) {
+	if (is_strobe(addr)) {
+		strobe_dispatch(addr);
+	}
 	mspace[addr] = b;
 }
 

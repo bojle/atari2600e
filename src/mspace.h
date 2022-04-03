@@ -24,7 +24,7 @@ typedef uint16_t addr_t;
 #define RAM_START 0x0180
 #define RAM_END 0x01ff
 
-enum {
+enum tia_write_addresses {
 	VSYNC  = 0x00,
 	VBLANK = 0x01, 
 	WSYNC  = 0x02, 
@@ -71,6 +71,36 @@ enum {
 	HMCLR  = 0x2B, 
 	CXCLR  = 0x2C 
 };
+
+enum tia_read_addresses {
+	CXM0P  = 0x00,   
+	CXM1P  = 0x01,   
+	CXP0FB = 0x02,   
+	CXP1FB = 0x03,   
+	CXM0FB = 0x04,   
+	CXM1FB = 0x05,   
+	CXBLPF = 0x06,   
+	CXPPMM = 0x07,   
+	INPT0  = 0x08,   
+	INPT1  = 0x09,   
+	INPT2  = 0x0A,   
+	INPT3  = 0x0B,   
+	INPT4  = 0x0C,   
+	INPT5  = 0x0D   
+};
+
+enum pia_addresses {
+	SWCHA 	= 0x0280, // Port A; input or output (read or write)
+	SWACNT 	= 0x0281, // Port A DDR, 0= input, 1=output
+	SWCHB 	= 0x0282, // Port B; console switches (read only)
+	SWBCNT 	= 0x0283, // Port B DDR (hardwired as input)
+	INTIM 	= 0x0284, // Timer output (read only)
+	TIM1T 	= 0x0294, // set 1 clock interval (838 nsec/interval)
+	TIM8T 	= 0x0295, // set 8 clock interval (6.7 usec/interval)
+	TIM64T 	= 0x0296, // set 64 clock interval (53.6 usec/interval)
+	T1024T 	= 0x0297  // set 1024 clock interval (858.2 usec/interval)
+};
+
 
 enum status_t {
 	STATUS_C = 1,         /* Carry         (0=No Carry, 1=Carry)                      */

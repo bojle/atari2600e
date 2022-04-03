@@ -5,23 +5,29 @@
 #include "log.h"
 #include "mspace.h"
 
-/* ADDRESSED ARE STORED WITH LOW BYTE FIRST 
- * naming convention
- * Immediate: name+i
- * Absolute: name
- * Zero pg Absolute: name+z
- * Implied: name
- * accumulator: name+a
- * indexed: name+id
- * 0pg indexed: name+idz
- * Indirect: name+in
- * Pre-indexed Indirect: name+pin
- * Post-Indexed indirect: name+pon
- * relative: name+r
+/* General Structure of the CPU 
+ *
+ * This is an emulator for MOS 6502 CPU.
+ * A load_cartridge() function loads a binary file to a specified location in the 
+ * address space and sets the Program Counter to the start of the file. As the 
+ * size of instructions in the 6502 Instruction Set are variable, the PC isn't 
+ * always incremented by the same value. All the information about an instruction
+ * (opcode, size, cycles, function, name) are present in a lookup table (indexed
+ * by the opcode field) found somewhere in this file. The size that PC should be 
+ * incremented to is obtained from this table. An inst_exec() function takes
+ * an opcode and calls the corresponding function associated with that opcode.
+ * This function 'executes' the instruction, bringing about a change in the 
+ * CPU state. As it may now be obvious, each instruction has a corresponding
+ * function. Those opcodes for which there is no instruction mapped (The "Illegal
+ * opcodes," as they are called), there is one 'vac' (vacant) function. An ad-hoc
+ * disassembler has been included for testing purposes. The ENABLE_DISASSEMBLER
+ * flag shall be defined to enable this disassembler. The disassembler outputs
+ * its contents to a "dis.asm" file in the current directory.
  */
 
-
 static _Bool CPU_RUNNING = 0;
+
+static uint32_t MACHINE_CYCLES = 0;
 
 /* Function pointer type for an instruction-function. */
 typedef int (*inst_fptr) (byte_t opcode);
@@ -42,6 +48,24 @@ static inst_t inst_tbl[INSTN];
 /* Used by inst_tbl_init() */
 #define inst_assign(opcode, nbytes, ncycles, execfn, iname) \
 	inst_tbl[opcode].bytes = nbytes; inst_tbl[opcode].cycles = ncycles; inst_tbl[opcode].exec = execfn; inst_tbl[opcode].name = iname
+
+/*
+ * Address Mode Naming Convention
+ *
+ * Immediate: 		name+i
+ * Zero Page: 		name+z
+ * ZeroPage,X: 		name+z+x
+ * ZeroPage,Y: 		name+z+y
+ * Absolute: 		name
+ * Absolute,X: 		name+a+x
+ * Absolute,Y:		name+a+y
+ * Indirect,X:		name+in+x
+ * Indirect,Y:		name+in+y
+ * Indirect Abs:	name+in
+ * Implied: 		name
+ * Accumulator: 	name+a
+ * Relative: 		name+r
+ */
 
 /************** INSTRUCTIONS ****************************/
 
@@ -1788,7 +1812,8 @@ int tya(byte_t opcode) {
 
 int vac(byte_t opcode) {
 	log_fatal("Vacant/Illegal Instruction: %02x", opcode);
-	exit(EXIT_FAILURE);
+	//exit(EXIT_FAILURE);
+	return 0;
 }
 
 /******************* END ****************************/
@@ -1978,59 +2003,59 @@ void inst_tbl_init() {
 	inst_assign(0x9a, 1, 2, txs,"txs");
 	inst_assign(0x98, 1, 2, tya,"tya");
 	/********* Vacant ************/
-	inst_assign(0x02, 0, 0, vac,"vac"); inst_assign(0x03, 0, 0, vac,"vac");
-	inst_assign(0x04, 0, 0, vac,"vac"); inst_assign(0x07, 0, 0, vac,"vac");
-	inst_assign(0x0B, 0, 0, vac,"vac"); inst_assign(0x0C, 0, 0, vac,"vac");
-	inst_assign(0x0F, 0, 0, vac,"vac"); inst_assign(0x12, 0, 0, vac,"vac");
-	inst_assign(0x13, 0, 0, vac,"vac"); inst_assign(0x14, 0, 0, vac,"vac");
-	inst_assign(0x17, 0, 0, vac,"vac"); inst_assign(0x1A, 0, 0, vac,"vac");
-	inst_assign(0x1B, 0, 0, vac,"vac"); inst_assign(0x1C, 0, 0, vac,"vac");
-	inst_assign(0x1F, 0, 0, vac,"vac"); inst_assign(0x42, 0, 0, vac,"vac");
-	inst_assign(0x43, 0, 0, vac,"vac"); inst_assign(0x44, 0, 0, vac,"vac");
-	inst_assign(0x47, 0, 0, vac,"vac"); inst_assign(0x4B, 0, 0, vac,"vac");
-	inst_assign(0x4F, 0, 0, vac,"vac"); inst_assign(0x52, 0, 0, vac,"vac");
-	inst_assign(0x53, 0, 0, vac,"vac"); inst_assign(0x54, 0, 0, vac,"vac");
-	inst_assign(0x57, 0, 0, vac,"vac"); inst_assign(0x5A, 0, 0, vac,"vac");
-	inst_assign(0x5B, 0, 0, vac,"vac"); inst_assign(0x5C, 0, 0, vac,"vac");
-	inst_assign(0x5F, 0, 0, vac,"vac"); inst_assign(0x80, 0, 0, vac,"vac");
-	inst_assign(0x82, 0, 0, vac,"vac"); inst_assign(0x83, 0, 0, vac,"vac");
-	inst_assign(0x87, 0, 0, vac,"vac"); inst_assign(0x89, 0, 0, vac,"vac");
-	inst_assign(0x8B, 0, 0, vac,"vac"); inst_assign(0x8F, 0, 0, vac,"vac");
-	inst_assign(0x92, 0, 0, vac,"vac"); inst_assign(0x93, 0, 0, vac,"vac");
-	inst_assign(0x97, 0, 0, vac,"vac"); inst_assign(0x9B, 0, 0, vac,"vac");
-	inst_assign(0x9C, 0, 0, vac,"vac"); inst_assign(0x9E, 0, 0, vac,"vac");
-	inst_assign(0x9F, 0, 0, vac,"vac"); inst_assign(0xC2, 0, 0, vac,"vac");
-	inst_assign(0xC3, 0, 0, vac,"vac"); inst_assign(0xC7, 0, 0, vac,"vac");
-	inst_assign(0xCB, 0, 0, vac,"vac"); inst_assign(0xCF, 0, 0, vac,"vac");
-	inst_assign(0xD2, 0, 0, vac,"vac"); inst_assign(0xD3, 0, 0, vac,"vac");
-	inst_assign(0xD4, 0, 0, vac,"vac"); inst_assign(0xD7, 0, 0, vac,"vac");
-	inst_assign(0xDA, 0, 0, vac,"vac"); inst_assign(0xDB, 0, 0, vac,"vac");
-	inst_assign(0xDC, 0, 0, vac,"vac"); inst_assign(0xDF, 0, 0, vac,"vac");
-	inst_assign(0x22, 0, 0, vac,"vac"); inst_assign(0x23, 0, 0, vac,"vac");
-	inst_assign(0x27, 0, 0, vac,"vac"); inst_assign(0x2B, 0, 0, vac,"vac");
-	inst_assign(0x2F, 0, 0, vac,"vac"); inst_assign(0x32, 0, 0, vac,"vac");
-	inst_assign(0x33, 0, 0, vac,"vac"); inst_assign(0x34, 0, 0, vac,"vac");
-	inst_assign(0x37, 0, 0, vac,"vac"); inst_assign(0x3A, 0, 0, vac,"vac");
-	inst_assign(0x3B, 0, 0, vac,"vac"); inst_assign(0x3C, 0, 0, vac,"vac");
-	inst_assign(0x3F, 0, 0, vac,"vac"); inst_assign(0x62, 0, 0, vac,"vac");
-	inst_assign(0x63, 0, 0, vac,"vac"); inst_assign(0x64, 0, 0, vac,"vac");
-	inst_assign(0x67, 0, 0, vac,"vac"); inst_assign(0x6B, 0, 0, vac,"vac");
-	inst_assign(0x6F, 0, 0, vac,"vac"); inst_assign(0x72, 0, 0, vac,"vac");
-	inst_assign(0x73, 0, 0, vac,"vac"); inst_assign(0x74, 0, 0, vac,"vac");
-	inst_assign(0x77, 0, 0, vac,"vac"); inst_assign(0x7A, 0, 0, vac,"vac");
-	inst_assign(0x7B, 0, 0, vac,"vac"); inst_assign(0x7C, 0, 0, vac,"vac");
-	inst_assign(0x7F, 0, 0, vac,"vac"); inst_assign(0xA3, 0, 0, vac,"vac");
-	inst_assign(0xA7, 0, 0, vac,"vac"); inst_assign(0xAB, 0, 0, vac,"vac");
-	inst_assign(0xAF, 0, 0, vac,"vac"); inst_assign(0xB2, 0, 0, vac,"vac");
-	inst_assign(0xB3, 0, 0, vac,"vac"); inst_assign(0xB7, 0, 0, vac,"vac");
-	inst_assign(0xBB, 0, 0, vac,"vac"); inst_assign(0xBF, 0, 0, vac,"vac");
-	inst_assign(0xE2, 0, 0, vac,"vac"); inst_assign(0xE3, 0, 0, vac,"vac");
-	inst_assign(0xE7, 0, 0, vac,"vac"); inst_assign(0xEB, 0, 0, vac,"vac");
-	inst_assign(0xEF, 0, 0, vac,"vac"); inst_assign(0xF2, 0, 0, vac,"vac");
-	inst_assign(0xF3, 0, 0, vac,"vac"); inst_assign(0xF4, 0, 0, vac,"vac");
-	inst_assign(0xF7, 0, 0, vac,"vac"); inst_assign(0xFA, 0, 0, vac,"vac");
-	inst_assign(0xFB, 0, 0, vac,"vac"); inst_assign(0xFC, 0, 0, vac,"vac");
-	inst_assign(0xFF, 0, 0, vac,"vac");
+	inst_assign(0x02, 1, 0, vac,"vac"); inst_assign(0x03, 1, 0, vac,"vac");
+	inst_assign(0x04, 1, 0, vac,"vac"); inst_assign(0x07, 1, 0, vac,"vac");
+	inst_assign(0x0B, 1, 0, vac,"vac"); inst_assign(0x0C, 1, 0, vac,"vac");
+	inst_assign(0x0F, 1, 0, vac,"vac"); inst_assign(0x12, 1, 0, vac,"vac");
+	inst_assign(0x13, 1, 0, vac,"vac"); inst_assign(0x14, 1, 0, vac,"vac");
+	inst_assign(0x17, 1, 0, vac,"vac"); inst_assign(0x1A, 1, 0, vac,"vac");
+	inst_assign(0x1B, 1, 0, vac,"vac"); inst_assign(0x1C, 1, 0, vac,"vac");
+	inst_assign(0x1F, 1, 0, vac,"vac"); inst_assign(0x42, 1, 0, vac,"vac");
+	inst_assign(0x43, 1, 0, vac,"vac"); inst_assign(0x44, 1, 0, vac,"vac");
+	inst_assign(0x47, 1, 0, vac,"vac"); inst_assign(0x4B, 1, 0, vac,"vac");
+	inst_assign(0x4F, 1, 0, vac,"vac"); inst_assign(0x52, 1, 0, vac,"vac");
+	inst_assign(0x53, 1, 0, vac,"vac"); inst_assign(0x54, 1, 0, vac,"vac");
+	inst_assign(0x57, 1, 0, vac,"vac"); inst_assign(0x5A, 1, 0, vac,"vac");
+	inst_assign(0x5B, 1, 0, vac,"vac"); inst_assign(0x5C, 1, 0, vac,"vac");
+	inst_assign(0x5F, 1, 0, vac,"vac"); inst_assign(0x80, 1, 0, vac,"vac");
+	inst_assign(0x82, 1, 0, vac,"vac"); inst_assign(0x83, 1, 0, vac,"vac");
+	inst_assign(0x87, 1, 0, vac,"vac"); inst_assign(0x89, 1, 0, vac,"vac");
+	inst_assign(0x8B, 1, 0, vac,"vac"); inst_assign(0x8F, 1, 0, vac,"vac");
+	inst_assign(0x92, 1, 0, vac,"vac"); inst_assign(0x93, 1, 0, vac,"vac");
+	inst_assign(0x97, 1, 0, vac,"vac"); inst_assign(0x9B, 1, 0, vac,"vac");
+	inst_assign(0x9C, 1, 0, vac,"vac"); inst_assign(0x9E, 1, 0, vac,"vac");
+	inst_assign(0x9F, 1, 0, vac,"vac"); inst_assign(0xC2, 1, 0, vac,"vac");
+	inst_assign(0xC3, 1, 0, vac,"vac"); inst_assign(0xC7, 1, 0, vac,"vac");
+	inst_assign(0xCB, 1, 0, vac,"vac"); inst_assign(0xCF, 1, 0, vac,"vac");
+	inst_assign(0xD2, 1, 0, vac,"vac"); inst_assign(0xD3, 1, 0, vac,"vac");
+	inst_assign(0xD4, 1, 0, vac,"vac"); inst_assign(0xD7, 1, 0, vac,"vac");
+	inst_assign(0xDA, 1, 0, vac,"vac"); inst_assign(0xDB, 1, 0, vac,"vac");
+	inst_assign(0xDC, 1, 0, vac,"vac"); inst_assign(0xDF, 1, 0, vac,"vac");
+	inst_assign(0x22, 1, 0, vac,"vac"); inst_assign(0x23, 1, 0, vac,"vac");
+	inst_assign(0x27, 1, 0, vac,"vac"); inst_assign(0x2B, 1, 0, vac,"vac");
+	inst_assign(0x2F, 1, 0, vac,"vac"); inst_assign(0x32, 1, 0, vac,"vac");
+	inst_assign(0x33, 1, 0, vac,"vac"); inst_assign(0x34, 1, 0, vac,"vac");
+	inst_assign(0x37, 1, 0, vac,"vac"); inst_assign(0x3A, 1, 0, vac,"vac");
+	inst_assign(0x3B, 1, 0, vac,"vac"); inst_assign(0x3C, 1, 0, vac,"vac");
+	inst_assign(0x3F, 1, 0, vac,"vac"); inst_assign(0x62, 1, 0, vac,"vac");
+	inst_assign(0x63, 1, 0, vac,"vac"); inst_assign(0x64, 1, 0, vac,"vac");
+	inst_assign(0x67, 1, 0, vac,"vac"); inst_assign(0x6B, 1, 0, vac,"vac");
+	inst_assign(0x6F, 1, 0, vac,"vac"); inst_assign(0x72, 1, 0, vac,"vac");
+	inst_assign(0x73, 1, 0, vac,"vac"); inst_assign(0x74, 1, 0, vac,"vac");
+	inst_assign(0x77, 1, 0, vac,"vac"); inst_assign(0x7A, 1, 0, vac,"vac");
+	inst_assign(0x7B, 1, 0, vac,"vac"); inst_assign(0x7C, 1, 0, vac,"vac");
+	inst_assign(0x7F, 1, 0, vac,"vac"); inst_assign(0xA3, 1, 0, vac,"vac");
+	inst_assign(0xA7, 1, 0, vac,"vac"); inst_assign(0xAB, 1, 0, vac,"vac");
+	inst_assign(0xAF, 1, 0, vac,"vac"); inst_assign(0xB2, 1, 0, vac,"vac");
+	inst_assign(0xB3, 1, 0, vac,"vac"); inst_assign(0xB7, 1, 0, vac,"vac");
+	inst_assign(0xBB, 1, 0, vac,"vac"); inst_assign(0xBF, 1, 0, vac,"vac");
+	inst_assign(0xE2, 1, 0, vac,"vac"); inst_assign(0xE3, 1, 0, vac,"vac");
+	inst_assign(0xE7, 1, 0, vac,"vac"); inst_assign(0xEB, 1, 0, vac,"vac");
+	inst_assign(0xEF, 1, 0, vac,"vac"); inst_assign(0xF2, 1, 0, vac,"vac");
+	inst_assign(0xF3, 1, 0, vac,"vac"); inst_assign(0xF4, 1, 0, vac,"vac");
+	inst_assign(0xF7, 1, 0, vac,"vac"); inst_assign(0xFA, 1, 0, vac,"vac");
+	inst_assign(0xFB, 1, 0, vac,"vac"); inst_assign(0xFC, 1, 0, vac,"vac");
+	inst_assign(0xFF, 1, 0, vac,"vac");
 	log_trace("inst_tbl_init(): Initialized Instruction Table");
 }
 
@@ -2132,10 +2157,18 @@ void disassemble(byte_t opcode, state_t *s) {
 
 void cpu_set_status(_Bool status) {
 	CPU_RUNNING = status;
+	char *status_str = (status == 1) ? "Running" : "Halted";
+	log_trace("CPU %s", status_str);
 }
 
 _Bool cpu_fetch_status() {
 	return CPU_RUNNING;
 }
 
+void cnt_machine_cycles(int inc) {
+	MACHINE_CYCLES += inc;
+}
 
+int fetch_machine_cycles() {
+	return MACHINE_CYCLES;
+}
