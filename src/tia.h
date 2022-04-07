@@ -3,7 +3,7 @@
 
 #include "mspace.h"
 
-typedef uint8_t pixel_t;
+typedef uint32_t pixel_t;
 
 #define VISIBLE_HEIGHT 192
 #define VSYNC_H 3
@@ -22,6 +22,9 @@ void strobe_dispatch(addr_t reg);
 void tia_init();
 void tia_exec();
 void print_framebuf();
+
+void cnt_color_clocks(int inc);
+int fetch_color_clocks();
 
 void display();
 

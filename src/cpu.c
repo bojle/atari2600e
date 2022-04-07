@@ -27,7 +27,7 @@
 
 static _Bool CPU_RUNNING = 0;
 
-static uint32_t MACHINE_CYCLES = 0;
+static unsigned int MACHINE_CYCLES = 0;
 
 /* Function pointer type for an instruction-function. */
 typedef int (*inst_fptr) (byte_t opcode);

@@ -48,13 +48,14 @@ int run_cpu() {
 	return cycles;
 }
 
-int tia_clocks = 0;
 
 int run_tia(int machine_cycles) {
-	for (int i = 0; i < (machine_cycles * 3); ++i) {
+	int clocks = machine_cycles * 3;
+	for (int i = 0; i < clocks; ++i) {
 		tia_exec();
 	}
-	return (machine_cycles * 3);
+	cnt_color_clocks(clocks);
+	return clocks;
 }
 
 int main(int argc, char *argv[]) {
