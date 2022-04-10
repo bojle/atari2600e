@@ -21,11 +21,14 @@ void strobe_dispatch(addr_t reg);
 
 void tia_init();
 void tia_exec();
-void print_framebuf();
+void tia_free();
 
 void cnt_color_clocks(int inc);
 int fetch_color_clocks();
 
 void display();
+
+void handle_input();
+void process_input(int code);
 
 #endif

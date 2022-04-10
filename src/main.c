@@ -1,11 +1,19 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "cpu.h"
 #include "except.h"
 #include "log.h"
 #include "mspace.h"
 #include "tia.h"
 
+void emu_free() {
+	tia_free();
+	log_trace("Exiting...");
+	exit(EXIT_SUCCESS);
+}
+
 void emu_init(int argc, char *argv[]) {
+	atexit(emu_free);
 	except_tbl_init();
 	inst_tbl_init();
 #ifdef ENABLE_DISASSEMBLER
@@ -17,11 +25,13 @@ void emu_init(int argc, char *argv[]) {
 	cpu_set_status(1);
 }
 
+
 #ifdef ENABLE_DISASSEMBLER
 static state_t state;
 #endif
 
 int run_cpu() {
+	/* If CPU is halted, return */
 	_Bool cpu_status = cpu_fetch_status();
 	if (!cpu_status) {
 		return 0;
@@ -71,5 +81,6 @@ int main(int argc, char *argv[]) {
 		machine_cycles = run_cpu();
 		color_clocks = run_tia(machine_cycles);
 		pc = fetch_PC();
+		handle_input();
 	}
 }

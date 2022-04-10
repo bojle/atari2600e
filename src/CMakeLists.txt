@@ -3,7 +3,7 @@ project(atari)
 set(CMAKE_BUILD_TYPE Debug)
 set(VERBOSE 1)
 #total_objects = main mspace err
-add_compile_options(-Wall -Wextra -pedantic -Wno-unused-parameter -DLOG_USE_COLOR)
+add_compile_options(-Wall -Wextra -pedantic -Wno-switch -Wno-unused-parameter -DLOG_USE_COLOR)
 add_library(mspace mspace.c)
 add_library(main main.c)
 add_library(except except.c)
