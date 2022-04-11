@@ -149,4 +149,9 @@ byte_t stack_top();
 
 void load_cartridge(char *filename);
 
+int p2(int n);
+
+#define set_bit(reg, n) (reg |= p2(n))
+#define clear_bit(reg, n) (reg &= (~p2(n)))
+
 #endif

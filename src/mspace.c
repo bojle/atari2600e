@@ -125,3 +125,12 @@ void load_cartridge(char *filename) {
 	}
 	set_PC(cart_entrypoint);
 }
+
+int p2(int n) {
+	int r = 1;
+	while (n >= 0) {
+		r *= 2;
+		n--;
+	}
+	return r;
+}

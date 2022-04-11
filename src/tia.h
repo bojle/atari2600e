@@ -29,6 +29,5 @@ int fetch_color_clocks();
 void display();
 
 void handle_input();
-void process_input(int code);
 
 #endif

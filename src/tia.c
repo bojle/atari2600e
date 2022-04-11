@@ -4,6 +4,7 @@
 #include "tia.h"
 #include "mspace.h"
 #include "log.h"
+#include "pia.h"
 
 /*
  * General Structure of the TIA
@@ -17,8 +18,13 @@
  * its turn. For example, if an instruction took 4 cycles, the TIA
  * gets to execute 12 (4x3) cycles.
  *
- * TODO: Update this column as you go. Include HBLANK, VBLANK, strobes
- * etc.
+ * How Inputs from the keyboard are handled
+ *
+ * handle_input() is a global function called by main() after calling 
+ * run_cpu() and run_tia(). All inputs meant for the PIA are handled
+ * by pia_process_input(). 
+ *
+ *
  */
 
 #define NSTROBE 10
@@ -374,6 +380,27 @@ void display() {
 static SDL_Event gbl_event;
 #define iskey(e, code) (e.key.keysym.scancode == code)
 
+static void process_input(int code) {
+	switch (code) {
+		case SDL_SCANCODE_Q:
+		case SDL_SCANCODE_ESCAPE:
+			exit(EXIT_SUCCESS);
+			break;
+		case SDL_SCANCODE_W:
+		case SDL_SCANCODE_A:
+		case SDL_SCANCODE_S:
+		case SDL_SCANCODE_D:
+		case SDL_SCANCODE_LEFT:
+		case SDL_SCANCODE_RIGHT:
+		case SDL_SCANCODE_UP:
+		case SDL_SCANCODE_DOWN:
+			pia_process_input(code);
+			break;
+		default:
+			break;
+	}
+}
+
 void handle_input() {
 	while (SDL_PollEvent(&gbl_event) != 0) {
 			if (gbl_event.type == SDL_QUIT) {
@@ -385,13 +412,3 @@ void handle_input() {
 	}
 }
 
-void process_input(int code) {
-	switch (code) {
-		case SDL_SCANCODE_Q:
-			exit(EXIT_SUCCESS);
-			break;
-		case SDL_SCANCODE_ESCAPE:
-			exit(EXIT_SUCCESS);
-			break;
-	}
-}
