@@ -27,7 +27,7 @@
 
 static _Bool CPU_RUNNING = 0;
 
-static unsigned int MACHINE_CYCLES = 0;
+static cycles_t MACHINE_CYCLES = 0;
 
 /* Function pointer type for an instruction-function. */
 typedef int (*inst_fptr) (byte_t opcode);
@@ -2165,10 +2165,10 @@ _Bool cpu_fetch_status() {
 	return CPU_RUNNING;
 }
 
-void cnt_machine_cycles(int inc) {
+void cnt_machine_cycles(cycles_t inc) {
 	MACHINE_CYCLES += inc;
 }
 
-int fetch_machine_cycles() {
+cycles_t fetch_machine_cycles() {
 	return MACHINE_CYCLES;
 }

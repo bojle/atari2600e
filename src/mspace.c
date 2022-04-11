@@ -27,7 +27,7 @@ byte_t fetch_byte(addr_t addr) {
 /* Set addr to b */
 void set_byte(addr_t addr, byte_t b) {
 	if (is_strobe(addr)) {
-		strobe_dispatch(addr);
+		strobe_dispatch(addr, b);
 	}
 	mspace[addr] = b;
 }

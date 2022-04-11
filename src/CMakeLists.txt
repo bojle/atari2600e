@@ -16,7 +16,7 @@ target_link_libraries(mspace log except tia)
 target_link_libraries(cpu log mspace)
 target_link_libraries(tia log SDL2 pia)
 target_link_libraries(pia SDL2 mspace)
-target_link_libraries(main except mspace log tia)
+target_link_libraries(main except mspace log tia pia)
 target_link_libraries(a SDL2)
 
 

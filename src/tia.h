@@ -17,14 +17,14 @@ typedef uint32_t pixel_t;
 
 
 int is_strobe(addr_t reg);
-void strobe_dispatch(addr_t reg);
+void strobe_dispatch(addr_t reg, byte_t b);
 
 void tia_init();
 void tia_exec();
 void tia_free();
 
-void cnt_color_clocks(int inc);
-int fetch_color_clocks();
+void cnt_color_clocks(cycles_t inc);
+cycles_t fetch_color_clocks();
 
 void display();
 

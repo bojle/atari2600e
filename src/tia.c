@@ -20,14 +20,12 @@
  *
  * How Inputs from the keyboard are handled
  *
- * handle_input() is a global function called by main() after calling 
- * run_cpu() and run_tia(). All inputs meant for the PIA are handled
- * by pia_process_input(). 
- *
+ * run_pia() calls handle_input() in main() after run_cpu() and run_tia() are 
+ * called. All inputs meant for the PIA are handled by pia_process_input(). 
  *
  */
 
-#define NSTROBE 10
+#define NSTROBE 14
 static int strobe_registers[NSTROBE] = {
 	WSYNC,
 	RSYNC,
@@ -38,16 +36,20 @@ static int strobe_registers[NSTROBE] = {
 	RESBL,
 	HMOVE,
 	HMCLR,
-	CXCLR
+	CXCLR,
+	TIM1T,
+	TIM8T,
+	TIM64T,
+	T1024T
 };
 
-static unsigned int COLOR_CLOCKS = 0;
+static cycles_t COLOR_CLOCKS = 0;
 
-void cnt_color_clocks(int inc) {
+void cnt_color_clocks(cycles_t inc) {
 	COLOR_CLOCKS += inc;
 }
 
-int fetch_color_clocks() {
+cycles_t fetch_color_clocks() {
 	return COLOR_CLOCKS;
 }
 
@@ -60,7 +62,7 @@ int is_strobe(addr_t reg) {
 	return 0;
 }
 
-void strobe_dispatch(addr_t reg) {
+void strobe_dispatch(addr_t reg, byte_t b) {
 	switch (reg) {
 		case WSYNC:
 			break;
@@ -82,7 +84,20 @@ void strobe_dispatch(addr_t reg) {
 			break;
 		case CXCLR:
 			break;
+		case TIM1T:
+			set_timer(b, 1);
+			break;
+		case TIM8T:
+			set_timer(b, 8);
+			break;
+		case TIM64T:
+			set_timer(b, 64);
+			break;
+		case T1024T:
+			set_timer(b, 1024);
+			break;
 		default:
+			/* Following line will never be reached by any code */
 			log_debug("Not a strobe register: %04x", reg);
 			break;
 	}
@@ -411,4 +426,3 @@ void handle_input() {
 			}
 	}
 }
-

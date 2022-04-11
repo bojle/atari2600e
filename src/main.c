@@ -5,6 +5,7 @@
 #include "log.h"
 #include "mspace.h"
 #include "tia.h"
+#include "pia.h"
 
 void emu_free() {
 	tia_free();
@@ -30,7 +31,7 @@ void emu_init(int argc, char *argv[]) {
 static state_t state;
 #endif
 
-int run_cpu() {
+cycles_t run_cpu() {
 	/* If CPU is halted, return */
 	_Bool cpu_status = cpu_fetch_status();
 	if (!cpu_status) {
@@ -43,7 +44,7 @@ int run_cpu() {
 
 	/* Execute an Instruction */
 	addr_t pc = fetch_PC();
-	byte_t cycles = 0;
+	cycles_t cycles = 0;
 	byte_t opcode = fetch_byte(pc);
 	cycles += inst_cycles(opcode);
 	cycles += inst_exec(opcode);
@@ -58,14 +59,19 @@ int run_cpu() {
 	return cycles;
 }
 
-
-int run_tia(int machine_cycles) {
-	int clocks = machine_cycles * 3;
-	for (int i = 0; i < clocks; ++i) {
+cycles_t run_tia(cycles_t machine_cycles) {
+	cycles_t clocks = machine_cycles * 3;
+	for (unsigned int i = 0; i < clocks; ++i) {
 		tia_exec();
 	}
 	cnt_color_clocks(clocks);
 	return clocks;
+}
+
+cycles_t run_pia(cycles_t machine_cycles) {
+	handle_input();
+	cnt_pia_cycles(machine_cycles);
+	return machine_cycles;
 }
 
 int main(int argc, char *argv[]) {
@@ -80,7 +86,7 @@ int main(int argc, char *argv[]) {
 	while (pc < CARMEM_END - 1) {
 		machine_cycles = run_cpu();
 		color_clocks = run_tia(machine_cycles);
+		run_pia(machine_cycles);
 		pc = fetch_PC();
-		handle_input();
 	}
 }

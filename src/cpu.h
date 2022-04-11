@@ -39,7 +39,7 @@ void disassemble(byte_t opcode, state_t *s);
 void cpu_set_status(_Bool status);
 _Bool cpu_fetch_status();
 
-void cnt_machine_cycles(int inc);
-int fetch_machine_cycles();
+void cnt_machine_cycles(cycles_t inc);
+cycles_t fetch_machine_cycles();
 
 #endif

@@ -8,6 +8,11 @@ typedef uint8_t byte_t;
 /* Width of the address bus */
 typedef uint16_t addr_t;
 
+/* Used by cycle counters */
+typedef uint32_t cycles_t;
+/* Signed cycles_t */
+typedef int32_t scycles_t;
+
 /* Data bus: 8-bit, address bus: 16-bit
  * Addresses addressed by a26: 0x0000 - 0xffff 
  * 0000-002C  TIA Write
