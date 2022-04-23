@@ -25,83 +25,6 @@
  *
  */
 
-#define NSTROBE 14
-static int strobe_registers[NSTROBE] = {
-	WSYNC,
-	RSYNC,
-	RESP0,
-	RESP1,
-	RESM0,
-	RESM1,
-	RESBL,
-	HMOVE,
-	HMCLR,
-	CXCLR,
-	TIM1T,
-	TIM8T,
-	TIM64T,
-	T1024T
-};
-
-static cycles_t COLOR_CLOCKS = 0;
-
-void cnt_color_clocks(cycles_t inc) {
-	COLOR_CLOCKS += inc;
-}
-
-cycles_t fetch_color_clocks() {
-	return COLOR_CLOCKS;
-}
-
-int is_strobe(addr_t reg) {
-	for (int i = 0; i < NSTROBE; ++i) {
-		if (reg == strobe_registers[i]) {
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void strobe_dispatch(addr_t reg, byte_t b) {
-	switch (reg) {
-		case WSYNC:
-			break;
-		case RSYNC:
-			break;
-		case RESP0:
-			break;
-		case RESP1:
-			break;
-		case RESM0:
-			break;
-		case RESM1:
-			break;
-		case RESBL:
-			break;
-		case HMOVE:
-			break;
-		case HMCLR:
-			break;
-		case CXCLR:
-			break;
-		case TIM1T:
-			set_timer(b, 1);
-			break;
-		case TIM8T:
-			set_timer(b, 8);
-			break;
-		case TIM64T:
-			set_timer(b, 64);
-			break;
-		case T1024T:
-			set_timer(b, 1024);
-			break;
-		default:
-			/* Following line will never be reached by any code */
-			log_debug("Not a strobe register: %04x", reg);
-			break;
-	}
-}
 
 static pixel_t color_map[256];
 #define color_assign(i, color) (color_map[i] = color)
@@ -267,7 +190,7 @@ int is_vblank_on() {
 static pixel_t frame_buffer[VISIBLE_HEIGHT * VISIBLE_WIDTH];
 
 pixel_t select_pixel() {
-	return color_map[0x0e];
+	return color_map[0xae];
 }
 
 
@@ -424,5 +347,94 @@ void handle_input() {
 			else {
 				process_input(gbl_event.key.keysym.scancode);
 			}
+	}
+}
+
+#define NSTROBE 14
+static int strobe_registers[NSTROBE] = {
+	WSYNC,
+	RSYNC,
+	RESP0,
+	RESP1,
+	RESM0,
+	RESM1,
+	RESBL,
+	HMOVE,
+	HMCLR,
+	CXCLR,
+	TIM1T,
+	TIM8T,
+	TIM64T,
+	T1024T
+};
+
+static cycles_t COLOR_CLOCKS = 0;
+
+void cnt_color_clocks(cycles_t inc) {
+	COLOR_CLOCKS += inc;
+}
+
+cycles_t fetch_color_clocks() {
+	return COLOR_CLOCKS;
+}
+
+int is_strobe(addr_t reg) {
+	for (int i = 0; i < NSTROBE; ++i) {
+		if (reg == strobe_registers[i]) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static unsigned int pos_p0 = 0;
+static unsigned int pos_p1 = 0;
+static unsigned int pos_m0 = 0;
+static unsigned int pos_m1 = 0;
+static unsigned int pos_bl = 0;
+
+void strobe_dispatch(addr_t reg, byte_t b) {
+	switch (reg) {
+		case WSYNC:
+			break;
+		case RSYNC:
+			break;
+		case RESP0:
+			pos_p0 = chi;
+			break;
+		case RESP1:
+			pos_p1 = chi;
+			break;
+		case RESM0:
+			pos_m0 = chi;
+			break;
+		case RESM1:
+			pos_m1 = chi;
+			break;
+		case RESBL:
+			pos_bl = chi;
+			break;
+		case HMOVE:
+			break;
+		case HMCLR:
+			break;
+		case CXCLR:
+			break;
+		case TIM1T:
+			set_timer(b, 1);
+			break;
+		case TIM8T:
+			set_timer(b, 8);
+			break;
+		case TIM64T:
+			set_timer(b, 64);
+			break;
+		case T1024T:
+			set_timer(b, 1024);
+			break;
+		default:
+			/* Following line will never be reached by any code */
+			log_debug("Not a strobe register: %04x", reg);
+			break;
 	}
 }
