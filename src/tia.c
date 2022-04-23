@@ -5,6 +5,7 @@
 #include "mspace.h"
 #include "log.h"
 #include "pia.h"
+#include "cpu.h"
 
 /*
  * General Structure of the TIA
@@ -267,7 +268,17 @@ void tia_exec() {
 		vi = 0;
 	}
 	ti = cal_total_index(hi, vi);
-
+	
+	/* CPU will usually be halted by WSYNC. This function
+	 * repeadtedly checks whether we have reached the end 
+	 * of a scanline and resumes the CPU after this condition
+	 * is met
+	 */
+	if (cpu_fetch_status() == 0) {
+		if (hi == TOTAL_WIDTH) {
+			cpu_set_status(1);
+		}
+	}
 }
 
 static SDL_Window *gbl_window;
@@ -396,6 +407,8 @@ static unsigned int pos_bl = 0;
 void strobe_dispatch(addr_t reg, byte_t b) {
 	switch (reg) {
 		case WSYNC:
+			/* Halt the CPU */
+			cpu_set_status(0);
 			break;
 		case RSYNC:
 			break;

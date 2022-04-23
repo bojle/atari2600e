@@ -35,7 +35,7 @@ cycles_t run_cpu() {
 	/* If CPU is halted, return */
 	_Bool cpu_status = cpu_fetch_status();
 	if (!cpu_status) {
-		return 0;
+		return 1;
 	}
 
 #ifdef ENABLE_DISASSEMBLER
