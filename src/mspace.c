@@ -126,11 +126,17 @@ void load_cartridge(char *filename) {
 	set_PC(cart_entrypoint);
 }
 
+/* equivalent to pow(2, n) */
 int p2(int n) {
 	int r = 1;
-	while (n >= 0) {
+	for (int i = 0; i < n; ++i) {
 		r *= 2;
-		n--;
 	}
 	return r;
+}
+
+void clear_address_bit(addr_t addr, int n) {
+	byte_t reg = fetch_byte(addr);
+	clear_bit(reg, n);
+	set_byte(addr, reg);
 }

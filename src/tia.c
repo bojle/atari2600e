@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "tia.h"
 #include "mspace.h"
 #include "log.h"
@@ -190,9 +191,6 @@ int is_vblank_on() {
 
 static pixel_t frame_buffer[VISIBLE_HEIGHT * VISIBLE_WIDTH];
 
-pixel_t select_pixel() {
-	return color_map[0xae];
-}
 
 
 /* Pointers
@@ -213,8 +211,136 @@ static unsigned int cvi = 0;
 static unsigned int ti = 0;
 static unsigned int cti = 0;
 
+static unsigned int pf_chi = 0;
+static unsigned int pf_i = 0;
+static int pf_rem = 0;
+
 #define cal_total_index(h, v) ((v * TOTAL_WIDTH) + h)
 #define cal_total_cindex(h, v) ((v * VISIBLE_WIDTH) + h)
+
+static pixel_t pf_scanline[VISIBLE_WIDTH];
+
+static void append_pfpixels(int *index, pixel_t v) {
+	int t_index = *index;	
+	for (int i = 0; i < 4; ++i) {
+		pf_scanline[*index] = v;
+		(*index) += 1;
+		t_index = *index;
+	}
+}
+
+static void fill_pf_scanline() {
+	byte_t reg;
+	pixel_t col_bk = fetch_byte(COLUBK);
+	pixel_t col_pf = fetch_byte(COLUPF);
+	pixel_t tmp;
+	int pf_index = 0;
+first_part:
+	for (int j = 4; j <= 7; ++j) {
+		reg = fetch_byte(PF0);
+		tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
+		append_pfpixels(&pf_index, tmp);
+	}
+	for (int j = 7; j >= 0; --j) {
+		reg = fetch_byte(PF1);
+		tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
+		append_pfpixels(&pf_index, tmp);
+	}
+	for (int j = 0; j <= 7; ++j) {
+		reg = fetch_byte(PF2);
+		tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
+		append_pfpixels(&pf_index, tmp);
+	}
+
+	if (pf_index == VISIBLE_WIDTH) {
+		goto end;
+	}
+
+	/* Reflect or not */
+	reg = fetch_byte(CTRLPF);
+	if (fetch_bit(reg, 0) == 0) {
+		goto first_part;
+	}
+	else {
+		for (int j = 7; j >= 0; --j) {
+			reg = fetch_byte(PF2);
+			tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
+			append_pfpixels(&pf_index, tmp);
+		}
+		for (int j = 0; j <= 7; ++j) {
+			reg = fetch_byte(PF1);
+			tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
+			append_pfpixels(&pf_index, tmp);
+		}
+		for (int j = 7; j <= 4; --j) {
+			reg = fetch_byte(PF0);
+			tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
+			append_pfpixels(&pf_index, tmp);
+		}
+	}
+end:
+	return;
+}
+
+
+pixel_t extract_pf_pixel() {
+	if (chi == 0) {
+		fill_pf_scanline();
+	}
+	return pf_scanline[chi];
+#if 0
+	pixel_t col_bk = fetch_byte(COLUBK);
+	pixel_t col_pf = fetch_byte(COLUPF);
+	pixel_t rv = col_bk;
+	pf_chi = chi;
+
+	if (pf_chi == 0) {
+		pf_i = 4;
+	}
+	else if (pf_chi == 17) {
+		pf_i = 7;
+	}
+	else if (pf_chi == 49) {
+		pf_i = 0;
+	}
+
+	/* 0 -> background
+	 * 1 -> foreground
+	 */
+	bool fg_or_bg = 0;	
+	byte_t reg;
+	if (pf_chi < 16) {
+		reg = fetch_byte(PF0);
+		fg_or_bg = fetch_bit(reg, pf_i);
+		rv = (fg_or_bg == 0) ? col_bk : col_pf;
+		if ((pf_chi + 1) % 4 == 0) {
+			++pf_i;
+		}
+	}
+	else if (pf_chi >= 16 || pf_chi < 48) {
+		reg = fetch_byte(PF1);
+		fg_or_bg = fetch_bit(reg, pf_i);
+		rv = (fg_or_bg == 0) ? col_bk : col_pf;
+		if ((pf_chi + 1) % 4 == 0) {
+			--pf_i;
+		}
+	}
+	else if (pf_chi >= 48 || pf_chi < 80) {
+		reg = fetch_byte(PF2);
+		fg_or_bg = fetch_bit(reg, pf_i);
+		rv = (fg_or_bg == 0) ? col_bk : col_pf;
+		if ((pf_chi + 1) % 4 == 0) {
+			++pf_i;
+		}
+	}
+	return rv;
+#endif
+}
+
+pixel_t select_pixel() {
+	pixel_t rv = extract_pf_pixel();
+	return color_map[rv];
+}
 
 /* If we are on the screen right now */
 int isonscreen() {
@@ -232,12 +358,12 @@ void place_pixel() {
 	frame_buffer[cti] = p;
 
 	chi++;
-	if (chi > VISIBLE_WIDTH) {
+	if (chi >= VISIBLE_WIDTH) {
 		chi = 0;
 		cvi++;
 	}
 
-	if (cvi > VISIBLE_HEIGHT) {
+	if (cvi >= VISIBLE_HEIGHT) {
 		cvi = 0;
 	}
 	cti = cal_total_cindex(chi, cvi);
@@ -404,6 +530,30 @@ static unsigned int pos_m0 = 0;
 static unsigned int pos_m1 = 0;
 static unsigned int pos_bl = 0;
 
+static void cal_pos(byte_t reg, unsigned int *pos) {
+	/* discard the lower nibble as we dont need it */
+	reg >>= 4;
+	/* extract the sign of the lower nibble */
+	int sign = reg >> 3;
+	/* turn off the 3rd bit */
+	reg &= 0xfe;
+
+	/*
+	 * Positive reg -> move left
+	 * Negative reg -> move right
+	 */
+	byte_t offset;
+	if (sign == 0) {
+		offset = reg;
+		*pos -= offset;
+	}
+	else {
+		offset = (~reg + 1);
+		*pos += offset;
+	}
+
+}
+
 void strobe_dispatch(addr_t reg, byte_t b) {
 	switch (reg) {
 		case WSYNC:
@@ -428,10 +578,28 @@ void strobe_dispatch(addr_t reg, byte_t b) {
 			pos_bl = chi;
 			break;
 		case HMOVE:
+			cal_pos(HMP0, &pos_p0);
+			cal_pos(HMP1, &pos_p1);
+			cal_pos(HMM0, &pos_m0);
+			cal_pos(HMM1, &pos_m1);
+			cal_pos(HMBL, &pos_bl);
 			break;
 		case HMCLR:
+			set_byte(HMP0, 0);
+			set_byte(HMP1, 0);
+			set_byte(HMM0, 0);
+			set_byte(HMM1, 0);
+			set_byte(HMBL, 0);
 			break;
 		case CXCLR:
+			clear_address_bit(CXM0P,  7); clear_address_bit(CXM0P, 6); 
+			clear_address_bit(CXM1P,  7); clear_address_bit(CXM1P, 6); 
+			clear_address_bit(CXP0FB, 7); clear_address_bit(CXP0FB, 6); 
+			clear_address_bit(CXP1FB, 7); clear_address_bit(CXP1FB, 6); 
+			clear_address_bit(CXM0FB, 7); clear_address_bit(CXM0FB, 6); 
+			clear_address_bit(CXM1FB, 7); clear_address_bit(CXM1FB, 6); 
+			clear_address_bit(CXBLPF, 7); 
+			clear_address_bit(CXPPMM, 7); clear_address_bit(CXPPMM, 6); 
 			break;
 		case TIM1T:
 			set_timer(b, 1);
@@ -451,3 +619,8 @@ void strobe_dispatch(addr_t reg, byte_t b) {
 			break;
 	}
 }
+
+/* NOTES: 
+ * tia_exec() should call detect_cols()
+ * select_pixel() should set cordinates
+ */

@@ -158,5 +158,9 @@ int p2(int n);
 
 #define set_bit(reg, n) (reg |= p2(n))
 #define clear_bit(reg, n) (reg &= (~p2(n)))
+#define fetch_bit(reg, n) ((reg & p2(n)) >> n)
+
+void clear_address_bit(addr_t addr, int n);
+
 
 #endif
