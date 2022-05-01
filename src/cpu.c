@@ -911,6 +911,10 @@ int jsr(byte_t opcode) {
 	addr_t pc = fetch_PC();
 	pc += inst_bytes(opcode);
 	/* pc now points to the next instruction */
+
+	/* The prologue in 6502 includes only the return
+	 * address pushed to the stack, registers are untouched
+	 */
 	byte_t hpc = (pc >> 8);
 	byte_t lpc = pc;
 	stack_push(hpc);
@@ -923,9 +927,11 @@ int jsr(byte_t opcode) {
 int ldai(byte_t opcode) {
 	byte_t operand = fetch_operand(opcode);
 	set_A(operand);
+	clear_STATUS(STATUS_N);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (operand == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -936,9 +942,11 @@ int ldaz(byte_t opcode) {
 	addr_t zaddr = fetch_operand(opcode);
 	byte_t operand = fetch_byte(zaddr);
 	set_A(operand);
+	clear_STATUS(STATUS_N);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (operand == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -949,9 +957,11 @@ int ldazx(byte_t opcode) {
 	zaddr += fetch_X();
 	byte_t operand = fetch_byte(zaddr);
 	set_A(operand);
+	clear_STATUS(STATUS_N);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (operand == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -961,9 +971,11 @@ int lda(byte_t opcode) {
 	addr_t addr = fetch_operand(opcode);
 	byte_t operand = fetch_byte(addr);
 	set_A(operand);
+	clear_STATUS(STATUS_N);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (operand == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -978,9 +990,11 @@ int ldaax(byte_t opcode) {
 	}
 	byte_t operand = fetch_byte(new_addr);
 	set_A(operand);
+	clear_STATUS(STATUS_N);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (operand == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -996,9 +1010,11 @@ int ldaay(byte_t opcode) {
 	}
 	byte_t operand = fetch_byte(new_addr);
 	set_A(operand);
+	clear_STATUS(STATUS_N);
 	if ((operand >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (operand == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -1008,9 +1024,11 @@ int ldaay(byte_t opcode) {
 int ldainx(byte_t opcode) {
 	byte_t value = fetch_indirectx_value(opcode);
 	set_A(value);
+	clear_STATUS(STATUS_N);
 	if ((value >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (value == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -1021,9 +1039,11 @@ int ldainy(byte_t opcode) {
 	byte_t extra_cycles = 0;
 	byte_t value = fetch_indirecty_value(opcode, &extra_cycles);
 	set_A(value);
+	clear_STATUS(STATUS_N);
 	if ((value >> 7) == 1) { 	// 7th bit of A is set
 		set_STATUS(STATUS_N);
 	}
+	clear_STATUS(STATUS_Z);
 	if (value == 0) {			// Result of last operation was zero
 		set_STATUS(STATUS_Z);
 	}
@@ -1502,6 +1522,10 @@ int rti(byte_t opcode) {
 }
 
 int rts(byte_t opcode) {
+	/* The epilogue in 6502 includes only popping
+	 * the return address from the stack, registers
+	 * are left untouched
+	 */
 	addr_t lpc = stack_pop();
 	addr_t hpc = stack_pop();
 	addr_t addr = (hpc << 8) + lpc;
@@ -1812,7 +1836,7 @@ int tya(byte_t opcode) {
 
 int vac(byte_t opcode) {
 	log_fatal("Vacant/Illegal Instruction: %02x", opcode);
-	//exit(EXIT_FAILURE);
+	exit(EXIT_FAILURE);
 	return 0;
 }
 
@@ -2157,8 +2181,10 @@ void disassemble(byte_t opcode, state_t *s) {
 
 void cpu_set_status(_Bool status) {
 	CPU_RUNNING = status;
+#if 0
 	char *status_str = (status == 1) ? "Running" : "Halted";
 	log_trace("CPU %s", status_str);
+#endif
 }
 
 _Bool cpu_fetch_status() {

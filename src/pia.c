@@ -15,6 +15,17 @@ void set_timer(byte_t intervals, uint32_t number) {
 
 void cnt_timer(cycles_t cycles) {
 	byte_t interval = fetch_byte(INTIM);
+	for (int i = 0; i < cycles; ++i) {
+		if (interval == 0) {
+			return;
+		}
+		timer_cycles--;
+		if ((timer_cycles % timer_number) == 0) {
+			interval--;
+			set_byte(INTIM, interval);
+		}
+	}
+#if 0
 	if (interval <= 0) {
 		return;
 	}
@@ -32,7 +43,8 @@ dec_interval:
 		if (interval == 0) {
 			set_STATUS(STATUS_Z);
 		}
-		set_byte(INTIM, interval);
+	set_byte(INTIM, interval);
+#endif
 }
 
 void cnt_pia_cycles(cycles_t cycles) {

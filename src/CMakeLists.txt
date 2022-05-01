@@ -5,7 +5,7 @@ set(VERBOSE 1)
 #total_objects = main mspace err
 add_compile_options(-Wall -Wextra -pedantic -Wno-switch -Wno-unused-parameter)
 add_compile_options(-DLOG_USE_COLOR)
-#add_compile_options(-DENABLE_DISASSEMBLY)
+#add_compile_options(-DENABLE_DISASSEMBLER)
 add_library(mspace mspace.c)
 add_library(main main.c)
 add_library(except except.c)

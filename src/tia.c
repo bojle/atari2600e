@@ -191,7 +191,11 @@ int is_vblank_on() {
 
 static pixel_t frame_buffer[VISIBLE_HEIGHT * VISIBLE_WIDTH];
 
-
+static int pos_p0 = -1;
+static int pos_p1 = -1;
+static int pos_m0 = -1;
+static int pos_m1 = -1;
+static int pos_bl = -1;
 
 /* Pointers
  * hi - horizontal index
@@ -211,21 +215,17 @@ static unsigned int cvi = 0;
 static unsigned int ti = 0;
 static unsigned int cti = 0;
 
-static unsigned int pf_chi = 0;
-static unsigned int pf_i = 0;
-static int pf_rem = 0;
 
 #define cal_total_index(h, v) ((v * TOTAL_WIDTH) + h)
 #define cal_total_cindex(h, v) ((v * VISIBLE_WIDTH) + h)
 
+/** PLAYFIELD **/
 static pixel_t pf_scanline[VISIBLE_WIDTH];
 
 static void append_pfpixels(int *index, pixel_t v) {
-	int t_index = *index;	
 	for (int i = 0; i < 4; ++i) {
 		pf_scanline[*index] = v;
 		(*index) += 1;
-		t_index = *index;
 	}
 }
 
@@ -272,7 +272,7 @@ first_part:
 			tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
 			append_pfpixels(&pf_index, tmp);
 		}
-		for (int j = 7; j <= 4; --j) {
+		for (int j = 7; j >= 4; --j) {
 			reg = fetch_byte(PF0);
 			tmp = (fetch_bit(reg, j) == 0) ?  col_bk : col_pf;
 			append_pfpixels(&pf_index, tmp);
@@ -282,70 +282,78 @@ end:
 	return;
 }
 
+static byte_t pf0_copy;
+static byte_t pf1_copy;
+static byte_t pf2_copy;
 
-pixel_t extract_pf_pixel() {
-	if (chi == 0) {
+static pixel_t current_pf_pixel() {
+	if (chi == 0 || pf0_copy != fetch_byte(PF0) ||
+			pf1_copy != fetch_byte(PF1) || pf2_copy != fetch_byte(PF2)) {
 		fill_pf_scanline();
 	}
+	pf0_copy = fetch_byte(PF0);
+	pf1_copy = fetch_byte(PF1);
+	pf2_copy = fetch_byte(PF2);
 	return pf_scanline[chi];
-#if 0
-	pixel_t col_bk = fetch_byte(COLUBK);
-	pixel_t col_pf = fetch_byte(COLUPF);
-	pixel_t rv = col_bk;
-	pf_chi = chi;
+}
 
-	if (pf_chi == 0) {
-		pf_i = 4;
-	}
-	else if (pf_chi == 17) {
-		pf_i = 7;
-	}
-	else if (pf_chi == 49) {
-		pf_i = 0;
-	}
+/** MISSILE **/
 
-	/* 0 -> background
-	 * 1 -> foreground
-	 */
-	bool fg_or_bg = 0;	
-	byte_t reg;
-	if (pf_chi < 16) {
-		reg = fetch_byte(PF0);
-		fg_or_bg = fetch_bit(reg, pf_i);
-		rv = (fg_or_bg == 0) ? col_bk : col_pf;
-		if ((pf_chi + 1) % 4 == 0) {
-			++pf_i;
+static pixel_t mx_scanline[VISIBLE_WIDTH];
+
+static byte_t missile_size(addr_t sz_reg) {
+	byte_t reg = fetch_byte(sz_reg);
+	byte_t d4 = fetch_bit(reg, 4);
+	byte_t d5 = fetch_bit(reg, 5) << 1;
+	byte_t exp = d5 + d4;
+	return p2(exp);
+}
+
+static void fill_mx_scanline() {
+	byte_t enam0 = fetch_byte(ENAM0);
+	byte_t enam1 = fetch_byte(ENAM1);
+	enam0 = fetch_bit(enam0, 1);
+	enam1 = fetch_bit(enam1, 1);
+
+	for (int i = 0; i < VISIBLE_WIDTH; ++i) {
+		if (i == pos_m0 && enam0) {
+			byte_t m0_sz = missile_size(NUSIZ0);
+			pixel_t m0_col = fetch_byte(COLUP0);
+			for (int j = 0; j < m0_sz; ++j) {
+				mx_scanline[i] = m0_col;
+				++i;
+			}
+		}
+		else if (i == pos_m1 && enam1) {
+			byte_t m0_sz = missile_size(NUSIZ0);
+			pixel_t m0_col = fetch_byte(COLUP0);
+			for (int j = 0; j < m0_sz; ++j) {
+				mx_scanline[i] = m0_col;
+				++i;
+			}
+		}
+		else {
+			mx_scanline[i] = pf_scanline[i];
 		}
 	}
-	else if (pf_chi >= 16 || pf_chi < 48) {
-		reg = fetch_byte(PF1);
-		fg_or_bg = fetch_bit(reg, pf_i);
-		rv = (fg_or_bg == 0) ? col_bk : col_pf;
-		if ((pf_chi + 1) % 4 == 0) {
-			--pf_i;
-		}
-	}
-	else if (pf_chi >= 48 || pf_chi < 80) {
-		reg = fetch_byte(PF2);
-		fg_or_bg = fetch_bit(reg, pf_i);
-		rv = (fg_or_bg == 0) ? col_bk : col_pf;
-		if ((pf_chi + 1) % 4 == 0) {
-			++pf_i;
-		}
-	}
-	return rv;
-#endif
+}
+
+static pixel_t current_mx_pixel() {
+	fill_mx_scanline();
+	return mx_scanline[chi];
 }
 
 pixel_t select_pixel() {
-	pixel_t rv = extract_pf_pixel();
+	pixel_t rv; 
+	rv = current_pf_pixel();
+	rv = current_mx_pixel();
 	return color_map[rv];
 }
 
 /* If we are on the screen right now */
 int isonscreen() {
-	if (( (hi > HBLANK_W) && (vi > VBLANK_H + VSYNC_H) ) &&
-		( (hi < TOTAL_WIDTH) && (vi < VBLANK_H + VSYNC_H + VISIBLE_HEIGHT) ) && 
+	if (( (hi >= HBLANK_W) && (vi >= VBLANK_H + VSYNC_H) ) &&
+		( (hi <= TOTAL_WIDTH) && (vi <= VBLANK_H + VSYNC_H + VISIBLE_HEIGHT) ) && 
 		( (!is_vsync_on()) && (!is_vblank_on()) )) {
 		return 1;
 	}
@@ -379,18 +387,20 @@ void place_pixel() {
 /* responsible for boundary matching and handling ti*/
 
 void tia_exec() {
+	int at_left_end = 0;
 	if (isonscreen()) {
 		place_pixel();
-		if (cti == VISIBLE_HEIGHT * VISIBLE_WIDTH - 1) {
+		if (cti >= VISIBLE_HEIGHT * VISIBLE_WIDTH - 1) {
 			display();
 		}
 	}
 	hi++;
-	if (hi > TOTAL_WIDTH) {
+	if (hi >= TOTAL_WIDTH) {
 		hi = 0;
+		at_left_end = 1;
 		vi++;
 	}
-	if (vi > TOTAL_HEIGHT) {
+	if (vi >= TOTAL_HEIGHT) {
 		vi = 0;
 	}
 	ti = cal_total_index(hi, vi);
@@ -401,7 +411,7 @@ void tia_exec() {
 	 * is met
 	 */
 	if (cpu_fetch_status() == 0) {
-		if (hi == TOTAL_WIDTH) {
+		if (at_left_end) {
 			cpu_set_status(1);
 		}
 	}
@@ -524,13 +534,8 @@ int is_strobe(addr_t reg) {
 	return 0;
 }
 
-static unsigned int pos_p0 = 0;
-static unsigned int pos_p1 = 0;
-static unsigned int pos_m0 = 0;
-static unsigned int pos_m1 = 0;
-static unsigned int pos_bl = 0;
 
-static void cal_pos(byte_t reg, unsigned int *pos) {
+static void cal_pos(byte_t reg, int *pos) {
 	/* discard the lower nibble as we dont need it */
 	reg >>= 4;
 	/* extract the sign of the lower nibble */
