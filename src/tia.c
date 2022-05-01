@@ -191,11 +191,11 @@ int is_vblank_on() {
 
 static pixel_t frame_buffer[VISIBLE_HEIGHT * VISIBLE_WIDTH];
 
-static int pos_p0 = -1;
-static int pos_p1 = -1;
-static int pos_m0 = -1;
-static int pos_m1 = -1;
-static int pos_bl = -1;
+static int pos_p0 = 0;
+static int pos_p1 = 0;
+static int pos_m0 = 0;
+static int pos_m1 = 0;
+static int pos_bl = 0;
 
 /* Pointers
  * hi - horizontal index
@@ -325,10 +325,10 @@ static void fill_mx_scanline() {
 			}
 		}
 		else if (i == pos_m1 && enam1) {
-			byte_t m0_sz = missile_size(NUSIZ0);
-			pixel_t m0_col = fetch_byte(COLUP0);
-			for (int j = 0; j < m0_sz; ++j) {
-				mx_scanline[i] = m0_col;
+			byte_t m1_sz = missile_size(NUSIZ1);
+			pixel_t m1_col = fetch_byte(COLUP1);
+			for (int j = 0; j < m1_sz; ++j) {
+				mx_scanline[i] = m1_col;
 				++i;
 			}
 		}
@@ -536,12 +536,15 @@ int is_strobe(addr_t reg) {
 
 
 static void cal_pos(byte_t reg, int *pos) {
+	if (*pos > VISIBLE_WIDTH) {
+		*pos = 0;
+	}
 	/* discard the lower nibble as we dont need it */
 	reg >>= 4;
 	/* extract the sign of the lower nibble */
 	int sign = reg >> 3;
 	/* turn off the 3rd bit */
-	reg &= 0xfe;
+	reg &= 0xf7;
 
 	/*
 	 * Positive reg -> move left
@@ -553,7 +556,7 @@ static void cal_pos(byte_t reg, int *pos) {
 		*pos -= offset;
 	}
 	else {
-		offset = (~reg + 1);
+		offset = ((~reg & 0x07) + 1);
 		*pos += offset;
 	}
 
@@ -583,11 +586,11 @@ void strobe_dispatch(addr_t reg, byte_t b) {
 			pos_bl = chi;
 			break;
 		case HMOVE:
-			cal_pos(HMP0, &pos_p0);
-			cal_pos(HMP1, &pos_p1);
-			cal_pos(HMM0, &pos_m0);
-			cal_pos(HMM1, &pos_m1);
-			cal_pos(HMBL, &pos_bl);
+			cal_pos(fetch_byte(HMP0), &pos_p0);
+			cal_pos(fetch_byte(HMP1), &pos_p1);
+			cal_pos(fetch_byte(HMM0), &pos_m0);
+			cal_pos(fetch_byte(HMM1), &pos_m1);
+			cal_pos(fetch_byte(HMBL), &pos_bl);
 			break;
 		case HMCLR:
 			set_byte(HMP0, 0);
