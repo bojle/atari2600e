@@ -320,6 +320,9 @@ static void fill_mx_scanline() {
 			byte_t m0_sz = missile_size(NUSIZ0);
 			pixel_t m0_col = fetch_byte(COLUP0);
 			for (int j = 0; j < m0_sz; ++j) {
+				if (i >= VISIBLE_WIDTH) {
+					break;
+				}
 				mx_scanline[i] = m0_col;
 				++i;
 			}
@@ -328,6 +331,9 @@ static void fill_mx_scanline() {
 			byte_t m1_sz = missile_size(NUSIZ1);
 			pixel_t m1_col = fetch_byte(COLUP1);
 			for (int j = 0; j < m1_sz; ++j) {
+				if (i >= VISIBLE_WIDTH) {
+					break;
+				}
 				mx_scanline[i] = m1_col;
 				++i;
 			}
@@ -339,7 +345,9 @@ static void fill_mx_scanline() {
 }
 
 static pixel_t current_mx_pixel() {
-	fill_mx_scanline();
+	if (chi == 0) {
+		fill_mx_scanline();
+	}
 	return mx_scanline[chi];
 }
 

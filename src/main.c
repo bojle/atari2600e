@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	while (pc < CARMEM_END - 1) {
 		machine_cycles = run_cpu();
 		color_clocks = run_tia(machine_cycles);
-		run_pia(color_clocks);
+		run_pia(machine_cycles);
 		pc = fetch_PC();
 	}
 }
