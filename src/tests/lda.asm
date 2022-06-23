@@ -12,7 +12,7 @@ Start
 	ldx #1
 	sta $f0,x
 	lda $f0,x
-
+	
 	org $FFFC
 	.word Start
 	.word Start
